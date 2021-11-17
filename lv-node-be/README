@@ -1,0 +1,10 @@
+curl http://localhost:3001/ping
+
+curl http://localhost:3001/net/state/eth0
+curl http://localhost:3001/net/setup/eth0 -H "Content-Type: application/json" -X POST -d '{"method":"dhcp"}'
+curl http://localhost:3001/net/state/eth0 {"method":"static","address":"10.77.4.100","prefix_length":8,"gateway":"10.77.0.1","name_servers":["10.77.0.1"]}
+
+Para que jale este debo de estar en el MSYS2 y ahi colgar el archivo howto.txt debido a que el curl que tengo en powershell de win10 no acepta como parametro el -F del comando
+curl -F 'data=@./howto.txt' "http://localhost:3001/upload?path=public/howto.txt"
+
+curl http://localhost:3001/data/test.txt
