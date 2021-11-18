@@ -8,3 +8,29 @@ Para que jale este debo de estar en el MSYS2 y ahi colgar el archivo howto.txt d
 curl -F 'data=@./howto.txt' "http://localhost:3001/upload?path=public/howto.txt"
 
 curl http://localhost:3001/data/test.txt
+
+
+#Respuestas del BBB
+$ curl http://nerves.local:31680/ping
+{"ping":"pong"}
+
+$ curl http://nerves.local:31680/net/state/eth0
+{"message":{"config":{"ipv4":{"method":"dhcp"},"type":"Elixir.VintageNetEthernet"},"connection":"disconnected","interface":"eth0","state":"configured"},"result":"ok"}
+
+$ curl http://nerves.local:31680/net/setup/eth0 -H "Content-Type: application/json" -X POST -d '{"method":"static", "address":"10.77.4.100", "prefix_length":8, "gateway":"10.77.0.1", "name_servers":["10.77.0.1"]}'
+{"result":"ok"}
+
+$ curl http://nerves.local:31680/net/state/eth0
+{"message":{"config":{"ipv4":{"address":[10,77,4,100],"gateway":[10,77,0,1],"method":"static","name_servers":[[10,77,0,1]],"prefix_length":8},"type":"Elixir.VintageNetEthernet"},"connection":"disconnected","interface":"eth0","state":"configured"},"result":"ok"}
+
+$ curl http://nerves.local:31680/net/setup/eth0 -H "Content-Type: application/json" -X POST -d '{"method":"dhcp"}'
+{"result":"ok"}
+
+$ curl http://nerves.local:31680/net/state/eth0
+{"message":{"config":{"ipv4":{"method":"dhcp"},"type":"Elixir.VintageNetEthernet"},"connection":"disconnected","interface":"eth0","state":"configured"},"result":"ok"}
+
+$ curl http://nerves.local:31680/app/stop/nss
+{"result":"ok"}
+
+$ curl http://nerves.local:31680/app/start/nss
+{"result":"ok"}
