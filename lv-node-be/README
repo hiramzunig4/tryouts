@@ -9,7 +9,6 @@ curl -F 'data=@./howto.txt' "http://localhost:3001/upload?path=public/howto.txt"
 
 curl http://localhost:3001/data/test.txt
 
-
 #Respuestas del BBB
 $ curl http://nerves.local:31680/ping
 {"ping":"pong"}

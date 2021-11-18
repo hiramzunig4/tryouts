@@ -12,18 +12,43 @@ const configEth0 = {
 }
 
 const dhcp = JSON.stringify({
-  method: "dhcp"
-})
+  message:
+    {
+      config:
+      {
+        ipv4:{ method:"dhcp" },
+        type:"Elixir.VintageNetEthernet"
+      },
+        connection:"disconnected",
+        interface:"eth0",
+        state:"configured"
+    }, 
+    result:"ok"
+  })
 
 const static = JSON.stringify({
-  method: "static",
-  address:"10.77.4.100", 
-  prefix_length:8, 
-  gateway:"10.77.0.1", 
-  name_servers:["10.77.0.1"]
-})
+  message:
+    {
+      config:
+      {
+        ipv4:
+        {
+          address:[10,77,4,100],
+          gateway:[10,77,0,1],
+          method:"static",
+          name_servers:[[10,77,0,1]],
+          prefix_length:8
+        },
+        type:"Elixir.VintageNetEthernet"
+      },
+      connection:"disconnected",
+      interface:"eth0",
+      state:"configured"
+    },
+    result:"ok"
+  })
 
-var actualConfig = configEth0.STATIC
+var actualConfig = configEth0.DHCP
 
 //curl http://localhost:3001/data/test.txt  
 app.use('/data', express.static('public'))
@@ -77,12 +102,22 @@ app.post('/net/setup/:name', (req, res) => {
   
   if(req.body.method == configEth0.STATIC) {
     actualConfig = configEth0.STATIC
-    res.end("OK")
+    res.end(JSON.stringify({result:"ok"}))
   }
   if(req.body.method == configEth0.DHCP) {
     actualConfig = configEth0.DHCP
-    res.end("OK")
+    res.end(JSON.stringify({result:"ok"}))
   }
+})
+
+//curl http://localhost:3001/start/nss
+app.get('/start/nss', (req, res) => {
+  res.end(JSON.stringify({ result: "ok" }))
+})
+
+//curl http://localhost:3001/stop/nss
+app.get('/stop/nss', (req, res) => {
+  res.end(JSON.stringify({ result: "ok" }))
 })
 
 app.listen(port, () => {
