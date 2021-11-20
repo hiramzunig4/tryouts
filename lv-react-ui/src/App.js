@@ -2,12 +2,13 @@ import React, { useState } from 'react';
 
 import Nav from 'react-bootstrap/Nav';
 import Network from './Network';
+import Database from './Database';
 import Empty from './Empty';
 import './App.css';
 
 function App() {
   
-  const [tab, setTab] = useState("database");
+  const [tab, setTab] = useState("network");
 
   function handleSelect(eventKey) {
     console.log(eventKey)
@@ -18,6 +19,8 @@ function App() {
     switch(eventKey) {
       case "network":
         return  (<Network/>);
+      case "database":
+        return  (<Database/>);
       default:
         return  (<Empty/>);
     }
@@ -25,7 +28,7 @@ function App() {
 
   return (
     <div className="App">
-      <Nav variant="tabs" activeKey={tab} onSelect={handleSelect}>
+      <Nav variant="pills" activeKey={tab} onSelect={handleSelect}>
         <Nav.Item>
           <Nav.Link eventKey="network">Network</Nav.Link>
         </Nav.Item>
