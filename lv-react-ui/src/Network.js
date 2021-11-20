@@ -15,7 +15,27 @@ function clickHandler(){
   })
 }
 
-function Network() {
+function clickHandlerEth0(){
+  console.log("clicked in get config");
+  api.getConfig(function(res){
+    console.log(res)
+  })
+}
+
+function Network(){
+
+  const [fieldDisabled, setFieldDisabled] = React.useState(false);
+
+  function handleChange(event){
+    console.log(event.target.id)
+    if(event.target.id === "radiodhcp"){
+      setFieldDisabled(true)
+    }
+    else{
+      setFieldDisabled(false)
+    }
+  }
+
   return (
     <Form>
         <fieldset>
@@ -25,26 +45,32 @@ function Network() {
             </Form.Label>
             <Col sm={2}>
                 <Form.Check
-                type="radio"
-                label="Obtain an IP address automatically"
-                name="formHorizontalRadios"
-                id="formHorizontalRadios1"
+                  type="radio"
+                  label="Obtain an IP address automatically"
+                  name="formHorizontalRadios"
+                  id="radiodhcp"
+                  onChange={handleChange}
                 />
                 <Form.Check
-                type="radio"
-                label="Use the following IP address:"
-                name="formHorizontalRadios"
-                id="formHorizontalRadios2"
+                  type="radio"
+                  label="Use the following IP address:"
+                  name="formHorizontalRadios"
+                  id="radiostatic"
+                  onChange={handleChange}
                 />
             </Col>
             </Form.Group>
         </fieldset>
-        <Form.Group as={Row} className="mb-2" controlId="formHorizontalEmail">
+        <Form.Group as={Row} className="mb-2">
             <Form.Label column sm={1}>
             Ip address:
             </Form.Label>
             <Col sm={10}>
-            <Form.Control type="ipaddress" placeholder="IP address" />
+            <Form.Control 
+              type="ipaddress" 
+              id="IpAddress"
+              disabled={fieldDisabled} 
+              placeholder="IP address" />
             </Col>
         </Form.Group>
 
@@ -89,6 +115,7 @@ function Network() {
           <Stack direction="horizontal" gap={3}>
             <Button>Set Config</Button>
             <Button onClick={clickHandler}>Ping</Button>
+            <Button onClick={clickHandlerEth0}> Get Config </Button>
           </Stack>
           </Col>
         </Form.Group>
