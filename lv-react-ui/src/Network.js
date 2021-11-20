@@ -70,11 +70,12 @@ function Network(){
       `);
       const config = {
         "method":"static", 
-        "address": address, 
+        "address": `${address}`, 
         "prefix_length":8, 
-        "gateway": gateway, 
-        "name_servers":[servers]
+        "gateway":  `${gateway}`, 
+        "name_servers":[`${servers}`]
       }
+      console.log(JSON.stringify(config))
       api.setConfigStatic(config, function(res){
         console.log(res)
       });
@@ -104,7 +105,7 @@ function Network(){
                   name="formHorizontalRadios"
                   id="radiodhcp"
                   onChange={handleChange}
-                  checked={item === "dhcp"}
+                  value={item === "dhcp"}
                 />
                 <Form.Check
                   type="radio"
@@ -112,7 +113,7 @@ function Network(){
                   name="formHorizontalRadios"
                   id="radiostatic"
                   onChange={handleChange}
-                  checked={item === "static"}
+                  value={item === "static"}
                 />
             </Col>
             </Form.Group>
