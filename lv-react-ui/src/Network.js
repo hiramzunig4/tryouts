@@ -23,16 +23,70 @@ function clickHandlerEth0(){
 }
 
 function Network(){
+  //State of input controls
+  const [IpAddressDisabled, setIpAddressdDisabled] = React.useState(false);
+  const [SubnetmaskDisabled, setSubnetmaskDisabled] = React.useState(false);
+  const [GatewayDisabled, setGatewayDisabled] = React.useState(false);
+  const [DnsprimaryDisabled, setDnsprimaryDisabled] = React.useState(false);
+  const [DnssecondaryDisabled, setDnsSecondaryDisabled] = React.useState(false);
+  
+  const [address, setAddress] = React.useState("");
+  const [netmask, setNetmask] = React.useState("");
+  const [gateway, setGateway] = React.useState("");
+  const [servers, setServers] = React.useState("");
+  
+  const [item, setItem] = React.useState("");
 
-  const [fieldDisabled, setFieldDisabled] = React.useState(false);
-
-  function handleChange(event){
+  function handleChange(event)
+  {
     console.log(event.target.id)
     if(event.target.id === "radiodhcp"){
-      setFieldDisabled(true)
+      setIpAddressdDisabled(true)
+      setSubnetmaskDisabled(true)
+      setGatewayDisabled(true)
+      setDnsprimaryDisabled(true)
+      setDnsSecondaryDisabled(true)
     }
     else{
-      setFieldDisabled(false)
+      setIpAddressdDisabled(false)
+      setSubnetmaskDisabled(false)
+      setGatewayDisabled(false)
+      setDnsprimaryDisabled(false)
+      setDnsSecondaryDisabled(false)
+    }
+    setItem(event.target.id)
+  }
+
+  const handleSubmit = (event) => {
+    event.preventDefault()
+    if(item === "radiostatic")
+    {
+      console.log(item)
+      console.log(`
+        address: ${address}
+        netMask: ${netmask}
+        gateway: ${gateway}
+        servers: ${servers}
+      `);
+      const config = {
+        "method":"static", 
+        "address": address, 
+        "prefix_length":8, 
+        "gateway": gateway, 
+        "name_servers":[servers]
+      }
+      api.setConfigStatic(config, function(res){
+        console.log(res)
+      });
+    }
+    else{
+      console.log(item)
+      const config = {
+        "method":"dhcp"
+      }
+      api.setConfigDhcp(config, function(res){
+        console.log(res)
+      });
     }
   }
 
@@ -50,6 +104,7 @@ function Network(){
                   name="formHorizontalRadios"
                   id="radiodhcp"
                   onChange={handleChange}
+                  checked={item === "dhcp"}
                 />
                 <Form.Check
                   type="radio"
@@ -57,6 +112,7 @@ function Network(){
                   name="formHorizontalRadios"
                   id="radiostatic"
                   onChange={handleChange}
+                  checked={item === "static"}
                 />
             </Col>
             </Form.Group>
@@ -69,17 +125,22 @@ function Network(){
             <Form.Control 
               type="ipaddress" 
               id="IpAddress"
-              disabled={fieldDisabled} 
+              disabled={IpAddressDisabled} 
+              onChange={e => setAddress(e.target.value)}
               placeholder="IP address" />
             </Col>
         </Form.Group>
 
-        <Form.Group as={Row} className="mb-3" controlId="formHorizontalPassword">
+        <Form.Group as={Row} className="mb-3">
             <Form.Label column sm={1}>
             Subnet mask
             </Form.Label>
             <Col sm={10}>
-            <Form.Control type="subnetmask" placeholder="Subnet mask" />
+            <Form.Control 
+              type="subnetmask"
+              onChange={e => setNetmask(e.target.value)}
+              disabled={SubnetmaskDisabled}  
+              placeholder="Subnet mask" />
             </Col>
         </Form.Group>
 
@@ -88,7 +149,11 @@ function Network(){
             Default Gateway
             </Form.Label>
             <Col sm={10}>
-            <Form.Control type="gateway" placeholder="Gateway" />
+            <Form.Control 
+              type="gateway"
+              onChange={e => setGateway(e.target.value)}
+              disabled={GatewayDisabled}   
+              placeholder="Gateway" />
             </Col>
         </Form.Group>
 
@@ -97,7 +162,11 @@ function Network(){
             Preferred DNS server
             </Form.Label>
             <Col sm={10}>
-            <Form.Control type="preferreddns" placeholder="DNS Primary" />
+            <Form.Control 
+              type="preferreddns" 
+              onChange={e => setServers(e.target.value)}
+              disabled={DnsprimaryDisabled}   
+              placeholder="DNS Primary" />
             </Col>
         </Form.Group>
 
@@ -106,14 +175,17 @@ function Network(){
             Alternate DNS
             </Form.Label>
             <Col sm={10}>
-            <Form.Control type="alternatedns" placeholder="DNS Secondary" />
+            <Form.Control 
+              type="alternatedns" 
+              disabled={DnssecondaryDisabled} 
+              placeholder="DNS Secondary" />
             </Col>
         </Form.Group>
 
         <Form.Group>
         <Col sm={{ span: 10, offset: 1 }}>
           <Stack direction="horizontal" gap={3}>
-            <Button>Set Config</Button>
+            <Button onClick={handleSubmit}>Set Config</Button>
             <Button onClick={clickHandler}>Ping</Button>
             <Button onClick={clickHandlerEth0}> Get Config </Button>
           </Stack>
