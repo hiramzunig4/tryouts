@@ -33,8 +33,9 @@ function Network(){
   const [address, setAddress] = React.useState("");
   const [netmask, setNetmask] = React.useState("");
   const [gateway, setGateway] = React.useState("");
-  const [servers, setServers] = React.useState("");
-  
+  const [serverprimary, setServerPrimary] = React.useState("");
+  const [serversecondary, setServerSecondary] = React.useState("");
+
   const [item, setItem] = React.useState("");
 
   function handleChange(event)
@@ -58,7 +59,9 @@ function Network(){
   }
 
   const handleSubmit = (event) => {
+    
     event.preventDefault()
+    
     if(item === "radiostatic")
     {
       console.log(item)
@@ -66,14 +69,15 @@ function Network(){
         address: ${address}
         netMask: ${netmask}
         gateway: ${gateway}
-        servers: ${servers}
+        server primary: ${serverprimary}
+        server secondary: ${serversecondary}
       `);
       const config = {
         "method":"static", 
         "address": `${address}`, 
         "prefix_length":8, 
         "gateway":  `${gateway}`, 
-        "name_servers":[`${servers}`]
+        "name_servers":[`${serverprimary}`,`${serversecondary}`]
       }
       console.log(JSON.stringify(config))
       api.setConfigStatic(config, function(res){
@@ -96,9 +100,8 @@ function Network(){
         <fieldset>
             <Form.Group as={Row} className="mb-3">
             <Form.Label as="legend" column sm={1}>
-                
             </Form.Label>
-            <Col sm={2}>
+            <Col sm={3} align="left">
                 <Form.Check
                   type="radio"
                   label="Obtain an IP address automatically"
@@ -158,26 +161,33 @@ function Network(){
             </Col>
         </Form.Group>
 
-        <Form.Group as={Row} className="mb-3" controlId="formHorizontalPassword">
+        <Form.Group as={Row} className="mb-3" controlId="formHorizontal">
             <Form.Label column sm={1}>
-            Preferred DNS server
+              Set DNS Servers
             </Form.Label>
-            <Col sm={10}>
+        </Form.Group>
+
+        <Form.Group as={Row} className="mb-3" controlId="formHorizontalPassword">
+            <Form.Label column sm={2}>
+            Primary
+            </Form.Label>
+            <Col sm={6}>
             <Form.Control 
               type="preferreddns" 
-              onChange={e => setServers(e.target.value)}
+              onChange={e => setServerPrimary(e.target.value)}
               disabled={DnsprimaryDisabled}   
               placeholder="DNS Primary" />
             </Col>
         </Form.Group>
 
         <Form.Group as={Row} className="mb-3" controlId="formHorizontalPassword">
-            <Form.Label column sm={1}>
-            Alternate DNS
+            <Form.Label column sm={2}>
+            Alternate
             </Form.Label>
-            <Col sm={10}>
+            <Col sm={6}>
             <Form.Control 
               type="alternatedns" 
+              onChange={e => setServerSecondary(e.target.value)}
               disabled={DnssecondaryDisabled} 
               placeholder="DNS Secondary" />
             </Col>
