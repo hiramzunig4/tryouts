@@ -72,12 +72,21 @@ function Network(){
         server primary: ${serverprimary}
         server secondary: ${serversecondary}
       `);
+
+      var maskNodes = netmask.match(/(\d+)/g);
+      var cidr = 0;
+      for(var i in maskNodes)
+      {
+        cidr += (((maskNodes[i] >>> 0).toString(2)).match(/1/g) || []).length;
+      }
+      console.log(cidr)
+
       var config=""
       if (serversecondary === "") {
         config = {
           "method":"static", 
           "address": `${address}`, 
-          "prefix_length":8, 
+          "prefix_length":cidr, 
           "gateway":  `${gateway}`, 
           "name_servers":[`${serverprimary}`]
         }
@@ -86,7 +95,7 @@ function Network(){
         config = {
           "method":"static", 
           "address": `${address}`, 
-          "prefix_length":8, 
+          "prefix_length":cidr, 
           "gateway":  `${gateway}`, 
           "name_servers":[`${serverprimary}`,`${serversecondary}`]
         }
