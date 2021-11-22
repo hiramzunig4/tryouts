@@ -10,6 +10,8 @@ import Col from 'react-bootstrap/Col'
 import Stack from 'react-bootstrap/Stack'
 import Button from 'react-bootstrap/Button'
 import Alert from 'react-bootstrap/Alert'
+import DropdownButton from 'react-bootstrap/DropdownButton'
+import Dropdown from 'react-bootstrap/Dropdown'
 
 function Network(){
   //State of input controls
@@ -35,6 +37,12 @@ function Network(){
   
   //Alerts
   const [isValid, setIsValid] = useState(false);
+
+  function handleGetDropDownSelect(event)
+  {
+    console.log(event);
+    setNetmask(event)
+  }
 
   function handleChange(event)
   {
@@ -158,7 +166,18 @@ function Network(){
         setStateRadioStatic(true)
         formState(false)
         setAddress(dataToUi(res.message.config.ipv4.address))
-        setNetmask(res.message.config.ipv4.prefix_length)
+        var addressIp = "";
+        switch(res.message.config.ipv4.prefix_length) {
+          case 8:
+            addressIp = "255.0.0.0"
+            break;
+          case 16:
+            addressIp = "255.255.0.0"
+            break;
+          default:
+            addressIp = "255.255.255.0"
+        }
+        setNetmask(addressIp)
         setGateway(dataToUi(res.message.config.ipv4.gateway))
         setServerPrimary(dataToUi(res.message.config.ipv4.name_servers[0]))
         if(res.message.config.ipv4.name_servers[1])
@@ -237,16 +256,19 @@ function Network(){
             <Form.Label align="right" column sm={2}>
             Subnet mask
             </Form.Label>
-            <Col sm={8}>
-            <Form.Control 
-              type="subnetmask"
-              onChange={e => setNetmask(e.target.value)}
-              disabled={SubnetmaskDisabled}  
-              value={netmask}
-              placeholder="Subnet mask" />
+            <Col sm={1} align="left">
+            <DropdownButton
+              title={netmask}
+              id="dropdown-menu-align-right"
+              variant="info"
+              onSelect={handleGetDropDownSelect}
+              disabled={SubnetmaskDisabled}>
+                <Dropdown.Item eventKey="255.255.255.0">255.255.255.0</Dropdown.Item>
+                <Dropdown.Item eventKey="255.255.0.0">255.255.0.0</Dropdown.Item>
+                <Dropdown.Item eventKey="255.0.0.0">255.0.0.0</Dropdown.Item>
+            </DropdownButton>
             </Col>
         </Form.Group>
-
         <Form.Group as={Row} className="mb-3">
             <Form.Label align="right" column sm={2}>
             Default Gateway
@@ -299,7 +321,7 @@ function Network(){
         <Col sm={{ span: 10, offset: 2 }}>
           <Stack direction="horizontal" gap={3}>
             <Button onClick={handleSubmit}>Set Config</Button>
-            <Button onClick={clickHandlerEth0}> Get Config </Button>
+            <Button onClick={clickHandlerEth0}>Get Config</Button>
             <Button onClick={clickHandler}>Ping</Button>
           </Stack>
           </Col>
