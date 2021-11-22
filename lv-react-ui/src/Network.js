@@ -1,26 +1,15 @@
+import { useState } from 'react'
+
 import './App.css';
 import api from "./api"
-import React from "react";
+import React from "react"
 
-import Form from 'react-bootstrap/Form';
-import Row from 'react-bootstrap/Row';
-import Col from 'react-bootstrap/Col';
+import Form from 'react-bootstrap/Form'
+import Row from 'react-bootstrap/Row'
+import Col from 'react-bootstrap/Col'
 import Stack from 'react-bootstrap/Stack'
-import Button from 'react-bootstrap/Button';
-
-function clickHandler(){
-  console.log("clicked in Ping");
-  api.getPing(function(res){
-    console.log(res)
-  })
-}
-
-function clickHandlerEth0(){
-  console.log("clicked in get config");
-  api.getConfig(function(res){
-    console.log(res)
-  })
-}
+import Button from 'react-bootstrap/Button'
+import Modal from 'react-bootstrap/Modal'
 
 function Network(){
   //State of input controls
@@ -34,9 +23,20 @@ function Network(){
   const [netmask, setNetmask] = React.useState("");
   const [gateway, setGateway] = React.useState("");
   const [serverprimary, setServerPrimary] = React.useState("");
-  const [serversecondary, setServerSecondary] = React.useState("");
+  const [serversecondary, setServerSecondary] = React.useState("")
 
-  const [item, setItem] = React.useState("");
+  //Manage radiobutton
+  const [item, setItem] = React.useState("")
+
+  //Control Modal Ping
+  const [showpingmodal, setShowPingModal] = useState(false)
+  const [responsePing, setResponsePing] = React.useState("")
+  const handleClosePing = () => setShowPingModal(false)
+  
+    //Control Modal Config
+    const [showconfigmodal, setShowConfigModal] = useState(false)
+    const [responseConfig, setResponseConfig] = React.useState("")
+    const handleCloseConfig = () => setShowConfigModal(false)
 
   function handleChange(event)
   {
@@ -72,12 +72,24 @@ function Network(){
         server primary: ${serverprimary}
         server secondary: ${serversecondary}
       `);
-      const config = {
-        "method":"static", 
-        "address": `${address}`, 
-        "prefix_length":8, 
-        "gateway":  `${gateway}`, 
-        "name_servers":[`${serverprimary}`,`${serversecondary}`]
+      var config=""
+      if (serversecondary === "") {
+        config = {
+          "method":"static", 
+          "address": `${address}`, 
+          "prefix_length":8, 
+          "gateway":  `${gateway}`, 
+          "name_servers":[`${serverprimary}`]
+        }
+      }
+      else{
+        config = {
+          "method":"static", 
+          "address": `${address}`, 
+          "prefix_length":8, 
+          "gateway":  `${gateway}`, 
+          "name_servers":[`${serverprimary}`,`${serversecondary}`]
+        }
       }
       console.log(JSON.stringify(config))
       api.setConfigStatic(config, function(res){
@@ -95,11 +107,29 @@ function Network(){
     }
   }
 
+  function clickHandler(){
+    console.log("clicked in Ping")
+    api.getPing(function(res){
+      console.log(res)
+      setResponsePing(`response ${JSON.stringify(res)}`)
+      setShowPingModal(true)
+    })
+  }
+
+  function clickHandlerEth0(){
+    console.log("clicked in get config");
+    api.getConfig(function(res){
+      console.log(res.message.config.ipv4)
+      setResponseConfig(`response ${JSON.stringify(res.message.config.ipv4)}`)
+      setShowConfigModal(true)
+    })
+  }
+
   return (
     <Form>
         <fieldset>
             <Form.Group as={Row} className="mb-3">
-            <Form.Label as="legend" column sm={1}>
+            <Form.Label as="legend" column sm={2}>
             </Form.Label>
             <Col sm={3} align="left">
                 <Form.Check
@@ -122,10 +152,10 @@ function Network(){
             </Form.Group>
         </fieldset>
         <Form.Group as={Row} className="mb-2">
-            <Form.Label column sm={1}>
-            Ip address:
+            <Form.Label align="right" column sm={2}>
+            Ip address
             </Form.Label>
-            <Col sm={10}>
+            <Col sm={8}>
             <Form.Control 
               type="ipaddress" 
               id="IpAddress"
@@ -136,10 +166,10 @@ function Network(){
         </Form.Group>
 
         <Form.Group as={Row} className="mb-3">
-            <Form.Label column sm={1}>
+            <Form.Label align="right" column sm={2}>
             Subnet mask
             </Form.Label>
-            <Col sm={10}>
+            <Col sm={8}>
             <Form.Control 
               type="subnetmask"
               onChange={e => setNetmask(e.target.value)}
@@ -148,11 +178,11 @@ function Network(){
             </Col>
         </Form.Group>
 
-        <Form.Group as={Row} className="mb-3" controlId="formHorizontalPassword">
-            <Form.Label column sm={1}>
+        <Form.Group as={Row} className="mb-3">
+            <Form.Label align="right" column sm={2}>
             Default Gateway
             </Form.Label>
-            <Col sm={10}>
+            <Col sm={8}>
             <Form.Control 
               type="gateway"
               onChange={e => setGateway(e.target.value)}
@@ -161,17 +191,17 @@ function Network(){
             </Col>
         </Form.Group>
 
-        <Form.Group as={Row} className="mb-3" controlId="formHorizontal">
-            <Form.Label column sm={1}>
-              Set DNS Servers
+        <Form.Group as={Row} className="mb-3">
+            <Form.Label align="right" column sm={2}>
+              Set DNS Servers:
             </Form.Label>
         </Form.Group>
 
-        <Form.Group as={Row} className="mb-3" controlId="formHorizontalPassword">
-            <Form.Label column sm={2}>
+        <Form.Group as={Row} className="mb-3">
+            <Form.Label align="right" column sm={2}>
             Primary
             </Form.Label>
-            <Col sm={6}>
+            <Col sm={8}>
             <Form.Control 
               type="preferreddns" 
               onChange={e => setServerPrimary(e.target.value)}
@@ -180,11 +210,11 @@ function Network(){
             </Col>
         </Form.Group>
 
-        <Form.Group as={Row} className="mb-3" controlId="formHorizontalPassword">
-            <Form.Label column sm={2}>
+        <Form.Group as={Row} className="mb-3">
+            <Form.Label align="right" column sm={2}>
             Alternate
             </Form.Label>
-            <Col sm={6}>
+            <Col sm={8}>
             <Form.Control 
               type="alternatedns" 
               onChange={e => setServerSecondary(e.target.value)}
@@ -194,15 +224,40 @@ function Network(){
         </Form.Group>
 
         <Form.Group>
-        <Col sm={{ span: 10, offset: 1 }}>
+        <Col sm={{ span: 10, offset: 2 }}>
           <Stack direction="horizontal" gap={3}>
             <Button onClick={handleSubmit}>Set Config</Button>
-            <Button onClick={clickHandler}>Ping</Button>
             <Button onClick={clickHandlerEth0}> Get Config </Button>
+            <Button onClick={clickHandler}>Ping</Button>
           </Stack>
           </Col>
         </Form.Group>
-        </Form>
+
+        <Modal show={showpingmodal} onHide={handleClosePing}>
+          <Modal.Header closeButton>
+            <Modal.Title>Ping</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>{responsePing}</Modal.Body>
+          <Modal.Footer>
+            <Button autoFocus variant="primary" onClick={handleClosePing}>
+              Ok
+            </Button>
+          </Modal.Footer>
+        </Modal>
+
+        <Modal show={showconfigmodal} onHide={handleCloseConfig}>
+          <Modal.Header closeButton>
+            <Modal.Title>Config</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>{responseConfig}</Modal.Body>
+          <Modal.Footer>
+            <Button autoFocus variant="primary" onClick={handleCloseConfig}>
+              Ok
+            </Button>
+          </Modal.Footer>
+        </Modal>
+
+      </Form>
   );
 }
 
