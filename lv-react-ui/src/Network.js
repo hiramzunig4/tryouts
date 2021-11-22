@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 
 import './App.css';
 import api from "./api"
@@ -9,7 +9,6 @@ import Row from 'react-bootstrap/Row'
 import Col from 'react-bootstrap/Col'
 import Stack from 'react-bootstrap/Stack'
 import Button from 'react-bootstrap/Button'
-import Modal from 'react-bootstrap/Modal'
 import Alert from 'react-bootstrap/Alert'
 
 function Network(){
@@ -28,36 +27,28 @@ function Network(){
 
   //Manage radiobutton
   const [item, setItem] = React.useState("")
+  const [stateradiodhcp, setStateRadioDhcp] = React.useState(false)
+  const [stateradiostatic, setStateRadioStatic] = React.useState(false)
 
-  //Control Modal Ping
-  const [showpingmodal, setShowPingModal] = useState(false)
+  //Control reponse Ping
   const [responsePing, setResponsePing] = React.useState("")
-  const handleClosePing = () => setShowPingModal(false)
   
-    //Control Modal Config
-    const [showconfigmodal, setShowConfigModal] = useState(false)
-    const [responseConfig, setResponseConfig] = React.useState("")
-    const handleCloseConfig = () => setShowConfigModal(false)
-
-    //Alerts
-    const [isValid, setIsValid] = useState(false);
+  //Alerts
+  const [isValid, setIsValid] = useState(false);
 
   function handleChange(event)
   {
     console.log(event.target.id)
     if(event.target.id === "radiodhcp"){
-      setIpAddressdDisabled(true)
-      setSubnetmaskDisabled(true)
-      setGatewayDisabled(true)
-      setDnsprimaryDisabled(true)
-      setDnsSecondaryDisabled(true)
+      //manejo el estado los radios
+      setStateRadioDhcp(true)
+      setStateRadioStatic(false)
+      formState(true)
     }
     else{
-      setIpAddressdDisabled(false)
-      setSubnetmaskDisabled(false)
-      setGatewayDisabled(false)
-      setDnsprimaryDisabled(false)
-      setDnsSecondaryDisabled(false)
+      setStateRadioDhcp(false)
+      setStateRadioStatic(true)
+      formState(false)
     }
     setItem(event.target.id)
   }
@@ -107,6 +98,11 @@ function Network(){
       console.log(JSON.stringify(config))
       api.setConfigStatic(config, function(res){
         console.log(res)
+        setResponsePing(`Set Static config ${JSON.stringify(res)}`)
+        setIsValid(true)
+        setTimeout(() => {
+          setIsValid(false)
+        }, 3000);
       });
     }
     else{
@@ -116,6 +112,11 @@ function Network(){
       }
       api.setConfigDhcp(config, function(res){
         console.log(res)
+        setResponsePing(`Set DHCP config ${JSON.stringify(res)}`)
+        setIsValid(true)
+        setTimeout(() => {
+          setIsValid(false)
+        }, 3000);
       });
     }
   }
@@ -124,10 +125,8 @@ function Network(){
     console.log("clicked in Ping")
     api.getPing(function(res){
       console.log(res)
-      setResponsePing(`response ${JSON.stringify(res)}`)
-      //setShowPingModal(true)
+      setResponsePing(`${JSON.stringify(res.message)}`)
       setIsValid(true)
-      //neta funciono?
       setTimeout(() => {
         setIsValid(false)
       }, 3000);
@@ -138,23 +137,60 @@ function Network(){
     console.log("clicked in get config");
     api.getConfig(function(res){
       console.log(res.message.config.ipv4)
-      setResponseConfig(`response ${JSON.stringify(res.message.config.ipv4)}`)
-      setShowConfigModal(true)
+      setResponsePing(`${JSON.stringify(res.message.config.ipv4.method)}`)
+      setIsValid(true)
+      //neta funciono?
+      setTimeout(() => {
+        setIsValid(false)
+      }, 3000);
+
+      if(res.message.config.ipv4.method === "dhcp")
+      {
+        setStateRadioDhcp(true)
+        setStateRadioStatic(false)
+        formState(true)
+      }
+      else{
+        
+      if(res.message.config.ipv4.method === "static")
+      {
+        setStateRadioDhcp(false)
+        setStateRadioStatic(true)
+        formState(false)
+        setAddress(dataToUi(res.message.config.ipv4.address))
+        setNetmask(res.message.config.ipv4.prefix_length)
+        setGateway(dataToUi(res.message.config.ipv4.gateway))
+        setServerPrimary(dataToUi(res.message.config.ipv4.name_servers[0]))
+        if(res.message.config.ipv4.name_servers[1])
+        {
+          setServerSecondary(dataToUi(res.message.config.ipv4.name_servers[1]))
+        }
+      }
+      }
     })
+  }
+
+  function dataToUi(key)
+  {
+    var addresswithpoints = `${JSON.stringify(key)}`.replace(/,/g,".")
+    return addresswithpoints.replace(/[[\]']/g,"")
+  }
+
+  function formState(state)
+  {
+    setIpAddressdDisabled(state)
+    setSubnetmaskDisabled(state)
+    setGatewayDisabled(state)
+    setDnsprimaryDisabled(state)
+    setDnsSecondaryDisabled(state)
   }
 
   return (
     <Form>
-      
-      <Alert show={isValid} animationType={"slide"} variant="success">
+      <Alert show={isValid} variant="success">
           <Alert.Heading> Response </Alert.Heading>
           <p>
             {responsePing}
-          </p>
-          <hr />
-          <p className="mb-3">
-            Whenever you need to, be sure to use margin utilities to keep things nice
-            and tidy.
           </p>
       </Alert>
 
@@ -169,7 +205,7 @@ function Network(){
                   name="formHorizontalRadios"
                   id="radiodhcp"
                   onChange={handleChange}
-                  value={item === "dhcp"}
+                  checked={stateradiodhcp}
                 />
                 <Form.Check
                   type="radio"
@@ -177,7 +213,7 @@ function Network(){
                   name="formHorizontalRadios"
                   id="radiostatic"
                   onChange={handleChange}
-                  value={item === "static"}
+                  checked={stateradiostatic}
                 />
             </Col>
             </Form.Group>
@@ -192,6 +228,7 @@ function Network(){
               id="IpAddress"
               disabled={IpAddressDisabled} 
               onChange={e => setAddress(e.target.value)}
+              value={address}
               placeholder="IP address" />
             </Col>
         </Form.Group>
@@ -205,6 +242,7 @@ function Network(){
               type="subnetmask"
               onChange={e => setNetmask(e.target.value)}
               disabled={SubnetmaskDisabled}  
+              value={netmask}
               placeholder="Subnet mask" />
             </Col>
         </Form.Group>
@@ -217,7 +255,8 @@ function Network(){
             <Form.Control 
               type="gateway"
               onChange={e => setGateway(e.target.value)}
-              disabled={GatewayDisabled}   
+              disabled={GatewayDisabled}  
+              value={gateway} 
               placeholder="Gateway" />
             </Col>
         </Form.Group>
@@ -236,7 +275,8 @@ function Network(){
             <Form.Control 
               type="preferreddns" 
               onChange={e => setServerPrimary(e.target.value)}
-              disabled={DnsprimaryDisabled}   
+              disabled={DnsprimaryDisabled}  
+              value={serverprimary}  
               placeholder="DNS Primary" />
             </Col>
         </Form.Group>
@@ -250,6 +290,7 @@ function Network(){
               type="alternatedns" 
               onChange={e => setServerSecondary(e.target.value)}
               disabled={DnssecondaryDisabled} 
+              value={serversecondary} 
               placeholder="DNS Secondary" />
             </Col>
         </Form.Group>
@@ -263,30 +304,6 @@ function Network(){
           </Stack>
           </Col>
         </Form.Group>
-
-        <Modal show={showpingmodal} onHide={handleClosePing}>
-          <Modal.Header closeButton>
-            <Modal.Title>Ping</Modal.Title>
-          </Modal.Header>
-          <Modal.Body>{responsePing}</Modal.Body>
-          <Modal.Footer>
-            <Button autoFocus variant="primary" onClick={handleClosePing}>
-              Ok
-            </Button>
-          </Modal.Footer>
-        </Modal>
-
-        <Modal show={showconfigmodal} onHide={handleCloseConfig}>
-          <Modal.Header closeButton>
-            <Modal.Title>Config</Modal.Title>
-          </Modal.Header>
-          <Modal.Body>{responseConfig}</Modal.Body>
-          <Modal.Footer>
-            <Button autoFocus variant="primary" onClick={handleCloseConfig}>
-              Ok
-            </Button>
-          </Modal.Footer>
-        </Modal>
       </Form>
   );
 }
