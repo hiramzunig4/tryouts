@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 import './App.css';
 import api from "./api"
@@ -10,6 +10,7 @@ import Col from 'react-bootstrap/Col'
 import Stack from 'react-bootstrap/Stack'
 import Button from 'react-bootstrap/Button'
 import Modal from 'react-bootstrap/Modal'
+import Alert from 'react-bootstrap/Alert'
 
 function Network(){
   //State of input controls
@@ -37,6 +38,9 @@ function Network(){
     const [showconfigmodal, setShowConfigModal] = useState(false)
     const [responseConfig, setResponseConfig] = React.useState("")
     const handleCloseConfig = () => setShowConfigModal(false)
+
+    //Alerts
+    const [isValid, setIsValid] = useState(false);
 
   function handleChange(event)
   {
@@ -121,7 +125,12 @@ function Network(){
     api.getPing(function(res){
       console.log(res)
       setResponsePing(`response ${JSON.stringify(res)}`)
-      setShowPingModal(true)
+      //setShowPingModal(true)
+      setIsValid(true)
+      //neta funciono?
+      setTimeout(() => {
+        setIsValid(false)
+      }, 3000);
     })
   }
 
@@ -136,6 +145,19 @@ function Network(){
 
   return (
     <Form>
+      
+      <Alert show={isValid} animationType={"slide"} variant="success">
+          <Alert.Heading> Response </Alert.Heading>
+          <p>
+            {responsePing}
+          </p>
+          <hr />
+          <p className="mb-3">
+            Whenever you need to, be sure to use margin utilities to keep things nice
+            and tidy.
+          </p>
+      </Alert>
+
         <fieldset>
             <Form.Group as={Row} className="mb-3">
             <Form.Label as="legend" column sm={2}>
@@ -265,7 +287,6 @@ function Network(){
             </Button>
           </Modal.Footer>
         </Modal>
-
       </Form>
   );
 }
