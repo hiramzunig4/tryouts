@@ -104,7 +104,7 @@ function Network(){
       console.log(JSON.stringify(config))
       api.setConfigStatic(config, function(res){
         console.log(res)
-        setResponsePing(`Set Static config ${JSON.stringify(res)}`)
+        setResponsePing(`Set Static Config Succes`)
         setIsValid(true)
         setTimeout(() => {
           setIsValid(false)
@@ -118,7 +118,7 @@ function Network(){
       }
       api.setConfigDhcp(config, function(res){
         console.log(res)
-        setResponsePing(`Set DHCP config ${JSON.stringify(res)}`)
+        setResponsePing(`Set DHCP Config Success`)
         setIsValid(true)
         setTimeout(() => {
           setIsValid(false)
@@ -131,7 +131,7 @@ function Network(){
     console.log("clicked in Ping")
     api.getPing(function(res){
       console.log(res)
-      setResponsePing(`${JSON.stringify(res.message)}`)
+      setResponsePing(`Ping Respose Ok`)
       setIsValid(true)
       setTimeout(() => {
         setIsValid(false)
@@ -143,7 +143,7 @@ function Network(){
     console.log("clicked in get config");
     api.getConfig(function(res){
       console.log(res.message.config.ipv4)
-      setResponsePing(`${JSON.stringify(res.message.config.ipv4.method)}`)
+      setResponsePing(`Get Config Success`)
       setIsValid(true)
       //neta funciono?
       setTimeout(() => {
@@ -208,7 +208,7 @@ function Network(){
   return (
     <Form>
       <Alert show={isValid} variant="success">
-            Success!!!
+            {responsePing}
       </Alert>
 
         <fieldset>
@@ -237,7 +237,7 @@ function Network(){
         </fieldset>
         <Form.Group as={Row} className="mb-2">
             <Form.Label align="right" column sm={2}>
-            Ip address
+            IP Address
             </Form.Label>
             <Col sm={8}>
             <Form.Control 
@@ -252,7 +252,7 @@ function Network(){
 
         <Form.Group as={Row} className="mb-3">
             <Form.Label align="right" column sm={2}>
-            Subnet mask
+            Subnet Mask
             </Form.Label>
             <Col sm={1} align="left">
             <DropdownButton
@@ -298,13 +298,13 @@ function Network(){
               onChange={e => setServerPrimary(e.target.value)}
               disabled={DnsprimaryDisabled}  
               value={serverprimary}  
-              placeholder="DNS Primary" />
+              placeholder="Primary DNS" />
             </Col>
         </Form.Group>
 
         <Form.Group as={Row} className="mb-3">
             <Form.Label align="right" column sm={2}>
-            Alternate
+            Secondary
             </Form.Label>
             <Col sm={8}>
             <Form.Control 
@@ -312,7 +312,7 @@ function Network(){
               onChange={e => setServerSecondary(e.target.value)}
               disabled={DnssecondaryDisabled} 
               value={serversecondary} 
-              placeholder="DNS Secondary" />
+              placeholder="Secondary DNS" />
             </Col>
         </Form.Group>
 
