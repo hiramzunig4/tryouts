@@ -22,14 +22,14 @@ function Network(){
   const [DnssecondaryDisabled, setDnsSecondaryDisabled] = React.useState(false);
   
   const [address, setAddress] = React.useState("");
-  const [netmask, setNetmask] = React.useState("");
+  const [netmask, setNetmask] = React.useState("255.255.255.0");
   const [gateway, setGateway] = React.useState("");
   const [serverprimary, setServerPrimary] = React.useState("");
   const [serversecondary, setServerSecondary] = React.useState("")
 
   //Manage radiobutton
-  const [item, setItem] = React.useState("")
-  const [stateradiodhcp, setStateRadioDhcp] = React.useState(false)
+  const [item, setItem] = React.useState("radiodhcp")
+  const [stateradiodhcp, setStateRadioDhcp] = React.useState(true)
   const [stateradiostatic, setStateRadioStatic] = React.useState(false)
 
   //Control reponse Ping
@@ -62,9 +62,7 @@ function Network(){
   }
 
   const handleSubmit = (event) => {
-    
     event.preventDefault()
-    
     if(item === "radiostatic")
     {
       console.log(item)
@@ -154,6 +152,7 @@ function Network(){
 
       if(res.message.config.ipv4.method === "dhcp")
       {
+        setItem("radiodhcp");
         setStateRadioDhcp(true)
         setStateRadioStatic(false)
         formState(true)
@@ -162,6 +161,7 @@ function Network(){
         
       if(res.message.config.ipv4.method === "static")
       {
+        setItem("radiostatic");
         setStateRadioDhcp(false)
         setStateRadioStatic(true)
         formState(false)
@@ -184,6 +184,7 @@ function Network(){
         {
           setServerSecondary(dataToUi(res.message.config.ipv4.name_servers[1]))
         }
+        
       }
       }
     })
@@ -207,10 +208,7 @@ function Network(){
   return (
     <Form>
       <Alert show={isValid} variant="success">
-          <Alert.Heading> Response </Alert.Heading>
-          <p>
-            {responsePing}
-          </p>
+            Success!!!
       </Alert>
 
         <fieldset>
@@ -260,9 +258,10 @@ function Network(){
             <DropdownButton
               title={netmask}
               id="dropdown-menu-align-right"
-              variant="info"
+              variant="secondary"
               onSelect={handleGetDropDownSelect}
-              disabled={SubnetmaskDisabled}>
+              disabled={SubnetmaskDisabled}
+              >
                 <Dropdown.Item eventKey="255.255.255.0">255.255.255.0</Dropdown.Item>
                 <Dropdown.Item eventKey="255.255.0.0">255.255.0.0</Dropdown.Item>
                 <Dropdown.Item eventKey="255.0.0.0">255.0.0.0</Dropdown.Item>
