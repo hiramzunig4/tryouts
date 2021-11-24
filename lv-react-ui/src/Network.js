@@ -7,6 +7,7 @@ import React from "react"
 import Col from 'react-bootstrap/Col'
 import Row from 'react-bootstrap/Row'
 import Form from 'react-bootstrap/Form'
+import Card from 'react-bootstrap/Card'
 import Alert from 'react-bootstrap/Alert'
 import Stack from 'react-bootstrap/Stack'
 import Button from 'react-bootstrap/Button'
@@ -63,7 +64,7 @@ function Network(){
   }
 
   const buttonClickSetConfig = (event) => {
-    event.preventDefault()
+    event.preventDefault();
     if(item === "radiostatic")
     {
       console.log(item)
@@ -74,6 +75,27 @@ function Network(){
         server primary: ${serverprimary}
         server secondary: ${serversecondary}
       `);
+
+      //validate form before send
+     if(!ValidateIPaddress(address))
+     {
+      setResponseString(`Enter a Correct IP Address`)
+      setIsError(true)
+      setTimeout(() => {
+        setIsError(false)
+      }, 3000);
+      return
+     }
+
+     if(!ValidateIPaddress(gateway))
+     {
+      setResponseString(`Enter a Correct Gateway`)
+      setIsError(true)
+      setTimeout(() => {
+        setIsError(false)
+      }, 3000);
+      return
+     }
 
       var maskNodes = netmask.match(/(\d+)/g);
       var cidr = 0;
@@ -104,7 +126,6 @@ function Network(){
       }
       console.log(JSON.stringify(config))
       api.setConfigStatic(config, function(res){
-        console.log(`esto lo contiene la response ${res}`)
         if(res.result === "ok")
         {
           setResponseString(`Set Static Config Succes`)
@@ -244,9 +265,31 @@ function Network(){
     setDnsSecondaryDisabled(state)
   }
 
+  function ValidateIPaddress(ipaddress) {  
+    if (/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(ipaddress)) {  
+      return (true)  
+    }  
+    return (false)  
+  }  
+
+  function ValidateIPaddressTR(ipaddress) {  
+    if (/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(ipaddress)) {  
+        
+    }  
+    else
+    {
+      setResponseString(`Enter a Correct IP Address`)
+      setIsError(true)
+      setTimeout(() => {
+        setIsError(false)
+      }, 3000);
+      return
+    }
+  } 
+
   return (
     <Form>
-      <h1> NETWORK </h1>
+     <Card.Title as="h1">NETWORK</Card.Title>
       <Alert show={isValid} variant="success">
             {responseString}
       </Alert>
@@ -287,6 +330,7 @@ function Network(){
               id="IpAddress"
               disabled={IpAddressDisabled} 
               onChange={e => setAddress(e.target.value)}
+              onBlurCapture={e => ValidateIPaddressTR(address)}
               value={address}
               placeholder="IP address" />
             </Col>

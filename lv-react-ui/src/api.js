@@ -1,4 +1,3 @@
-
 function setConfigDhcp(config, cb) {
     fetch("/net/setup/eth0", {
         method: "post",
