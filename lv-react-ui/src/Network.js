@@ -4,20 +4,20 @@ import './App.css';
 import api from "./api"
 import React from "react"
 
-import Form from 'react-bootstrap/Form'
-import Row from 'react-bootstrap/Row'
 import Col from 'react-bootstrap/Col'
+import Row from 'react-bootstrap/Row'
+import Form from 'react-bootstrap/Form'
+import Alert from 'react-bootstrap/Alert'
 import Stack from 'react-bootstrap/Stack'
 import Button from 'react-bootstrap/Button'
-import Alert from 'react-bootstrap/Alert'
-import DropdownButton from 'react-bootstrap/DropdownButton'
 import Dropdown from 'react-bootstrap/Dropdown'
+import DropdownButton from 'react-bootstrap/DropdownButton'
 
 function Network(){
   //State of input controls
+  const [GatewayDisabled, setGatewayDisabled] = React.useState(false);
   const [IpAddressDisabled, setIpAddressdDisabled] = React.useState(false);
   const [SubnetmaskDisabled, setSubnetmaskDisabled] = React.useState(false);
-  const [GatewayDisabled, setGatewayDisabled] = React.useState(false);
   const [DnsprimaryDisabled, setDnsprimaryDisabled] = React.useState(false);
   const [DnssecondaryDisabled, setDnsSecondaryDisabled] = React.useState(false);
   
@@ -32,8 +32,8 @@ function Network(){
   const [stateradiodhcp, setStateRadioDhcp] = React.useState(true)
   const [stateradiostatic, setStateRadioStatic] = React.useState(false)
 
-  //Control reponse Ping
-  const [responsePing, setResponsePing] = React.useState("")
+  //Response from yeico appliance
+  const [responseString, setResponseString] = React.useState("")
   
   //Alerts
   const [isValid, setIsValid] = useState(false);
@@ -44,7 +44,7 @@ function Network(){
     setNetmask(event)
   }
 
-  function handleChange(event)
+  function clickRadioButton(event)
   {
     console.log(event.target.id)
     if(event.target.id === "radiodhcp"){
@@ -61,7 +61,7 @@ function Network(){
     setItem(event.target.id)
   }
 
-  const handleSubmit = (event) => {
+  const buttonClickSetConfig = (event) => {
     event.preventDefault()
     if(item === "radiostatic")
     {
@@ -104,7 +104,7 @@ function Network(){
       console.log(JSON.stringify(config))
       api.setConfigStatic(config, function(res){
         console.log(res)
-        setResponsePing(`Set Static Config Succes`)
+        setResponseString(`Set Static Config Succes`)
         setIsValid(true)
         setTimeout(() => {
           setIsValid(false)
@@ -118,7 +118,7 @@ function Network(){
       }
       api.setConfigDhcp(config, function(res){
         console.log(res)
-        setResponsePing(`Set DHCP Config Success`)
+        setResponseString(`Set DHCP Config Success`)
         setIsValid(true)
         setTimeout(() => {
           setIsValid(false)
@@ -127,11 +127,11 @@ function Network(){
     }
   }
 
-  function clickHandler(){
+  function buttonClickPing(){
     console.log("clicked in Ping")
     api.getPing(function(res){
-      console.log(res)
-      setResponsePing(`Ping Respose Ok`)
+      console.log(`Respuesta del ping ${JSON.stringify(res)}`)
+      setResponseString(`Ping Respose Ok`)
       setIsValid(true)
       setTimeout(() => {
         setIsValid(false)
@@ -139,11 +139,11 @@ function Network(){
     })
   }
 
-  function clickHandlerEth0(){
+  function buttonClickGetConfig(){
     console.log("clicked in get config");
     api.getConfig(function(res){
       console.log(res.message.config.ipv4)
-      setResponsePing(`Get Config Success`)
+      setResponseString(`Get Config Success`)
       setIsValid(true)
       //neta funciono?
       setTimeout(() => {
@@ -207,8 +207,9 @@ function Network(){
 
   return (
     <Form>
+      <h1> NETWORK </h1>
       <Alert show={isValid} variant="success">
-            {responsePing}
+            {responseString}
       </Alert>
 
         <fieldset>
@@ -221,7 +222,7 @@ function Network(){
                   label="Obtain an IP address automatically"
                   name="formHorizontalRadios"
                   id="radiodhcp"
-                  onChange={handleChange}
+                  onChange={clickRadioButton}
                   checked={stateradiodhcp}
                 />
                 <Form.Check
@@ -229,7 +230,7 @@ function Network(){
                   label="Use the following IP address:"
                   name="formHorizontalRadios"
                   id="radiostatic"
-                  onChange={handleChange}
+                  onChange={clickRadioButton}
                   checked={stateradiostatic}
                 />
             </Col>
@@ -319,9 +320,9 @@ function Network(){
         <Form.Group>
         <Col sm={{ span: 10, offset: 2 }}>
           <Stack direction="horizontal" gap={3}>
-            <Button onClick={handleSubmit}>Set Config</Button>
-            <Button onClick={clickHandlerEth0}>Get Config</Button>
-            <Button onClick={clickHandler}>Ping</Button>
+            <Button onClick={buttonClickSetConfig}>Set Config</Button>
+            <Button onClick={buttonClickGetConfig}>Get Config</Button>
+            <Button onClick={buttonClickPing}>Ping</Button>
           </Stack>
           </Col>
         </Form.Group>

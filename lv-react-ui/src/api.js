@@ -32,7 +32,7 @@ function getPing(cb) {
     fetch("/ping")
       .then(res => res.json())
       .then(json => cb(json))
-      .catch(err => console.log(err))
+      .catch(err => cb(err))
 }
 
 const exports = {
