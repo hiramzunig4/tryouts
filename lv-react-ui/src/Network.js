@@ -37,6 +37,7 @@ function Network(){
   
   //Alerts
   const [isValid, setIsValid] = useState(false);
+  const [isError, setIsError] = useState(false);
 
   function handleGetDropDownSelect(event)
   {
@@ -103,12 +104,22 @@ function Network(){
       }
       console.log(JSON.stringify(config))
       api.setConfigStatic(config, function(res){
-        console.log(res)
-        setResponseString(`Set Static Config Succes`)
-        setIsValid(true)
-        setTimeout(() => {
-          setIsValid(false)
-        }, 3000);
+        console.log(`esto lo contiene la response ${res}`)
+        if(res.result === "ok")
+        {
+          setResponseString(`Set Static Config Succes`)
+          setIsValid(true)
+          setTimeout(() => {
+            setIsValid(false)
+          }, 3000);
+        }
+        else{
+            setResponseString(`Set Static Config Error`)
+            setIsError(true)
+            setTimeout(() => {
+              setIsError(false)
+            }, 3000);
+          }
       });
     }
     else{
@@ -118,11 +129,21 @@ function Network(){
       }
       api.setConfigDhcp(config, function(res){
         console.log(res)
-        setResponseString(`Set DHCP Config Success`)
-        setIsValid(true)
-        setTimeout(() => {
-          setIsValid(false)
-        }, 3000);
+        if(res.result === "ok")
+        {
+          setResponseString(`Set Static Config Succes`)
+          setIsValid(true)
+          setTimeout(() => {
+            setIsValid(false)
+          }, 3000);
+        }
+        else{
+          setResponseString(`Set Static Config Error`)
+          setIsError(true)
+          setTimeout(() => {
+            setIsError(false)
+          }, 3000);
+        }
       });
     }
   }
@@ -131,61 +152,79 @@ function Network(){
     console.log("clicked in Ping")
     api.getPing(function(res){
       console.log(`Respuesta del ping ${JSON.stringify(res)}`)
-      setResponseString(`Ping Respose Ok`)
-      setIsValid(true)
-      setTimeout(() => {
-        setIsValid(false)
-      }, 3000);
+      if(res.result === "ok")
+      {
+        setResponseString(`Ping Response Success`)
+        setIsValid(true)
+        setTimeout(() => {
+          setIsValid(false)
+        }, 3000);
+      }
+      else{
+        setResponseString(`Ping Response Error`)
+        setIsError(true)
+        setTimeout(() => {
+          setIsError(false)
+        }, 3000);
+      }
     })
   }
 
   function buttonClickGetConfig(){
     console.log("clicked in get config");
     api.getConfig(function(res){
-      console.log(res.message.config.ipv4)
-      setResponseString(`Get Config Success`)
-      setIsValid(true)
-      //neta funciono?
-      setTimeout(() => {
-        setIsValid(false)
-      }, 3000);
-
-      if(res.message.config.ipv4.method === "dhcp")
+      console.log(res)
+      if(res.result === "ok")
       {
-        setItem("radiodhcp");
-        setStateRadioDhcp(true)
-        setStateRadioStatic(false)
-        formState(true)
+        setResponseString(`Get Config Success`)
+        setIsValid(true)
+        //neta funciono?
+        setTimeout(() => {
+          setIsValid(false)
+        }, 3000);
+  
+        if(res.message.config.ipv4.method === "dhcp")
+        {
+          setItem("radiodhcp");
+          setStateRadioDhcp(true)
+          setStateRadioStatic(false)
+          formState(true)
+        }
+        else{ 
+          if(res.message.config.ipv4.method === "static")
+          {
+            setItem("radiostatic");
+            setStateRadioDhcp(false)
+            setStateRadioStatic(true)
+            formState(false)
+            setAddress(dataToUi(res.message.config.ipv4.address))
+            var addressIp = "";
+            switch(res.message.config.ipv4.prefix_length) {
+              case 8:
+                addressIp = "255.0.0.0"
+                break;
+              case 16:
+                addressIp = "255.255.0.0"
+                break;
+              default:
+                addressIp = "255.255.255.0"
+            }
+            setNetmask(addressIp)
+            setGateway(dataToUi(res.message.config.ipv4.gateway))
+            setServerPrimary(dataToUi(res.message.config.ipv4.name_servers[0]))
+            if(res.message.config.ipv4.name_servers[1])
+            {
+              setServerSecondary(dataToUi(res.message.config.ipv4.name_servers[1]))
+            }
+          }
+        }
       }
       else{
-        
-      if(res.message.config.ipv4.method === "static")
-      {
-        setItem("radiostatic");
-        setStateRadioDhcp(false)
-        setStateRadioStatic(true)
-        formState(false)
-        setAddress(dataToUi(res.message.config.ipv4.address))
-        var addressIp = "";
-        switch(res.message.config.ipv4.prefix_length) {
-          case 8:
-            addressIp = "255.0.0.0"
-            break;
-          case 16:
-            addressIp = "255.255.0.0"
-            break;
-          default:
-            addressIp = "255.255.255.0"
-        }
-        setNetmask(addressIp)
-        setGateway(dataToUi(res.message.config.ipv4.gateway))
-        setServerPrimary(dataToUi(res.message.config.ipv4.name_servers[0]))
-        if(res.message.config.ipv4.name_servers[1])
-        {
-          setServerSecondary(dataToUi(res.message.config.ipv4.name_servers[1]))
-        }
-        
-      }
+        setResponseString(`Get Config Error`)
+        setIsError(true)
+        setTimeout(() => {
+          setIsError(false)
+        }, 3000);
       }
     })
   }
@@ -211,7 +250,9 @@ function Network(){
       <Alert show={isValid} variant="success">
             {responseString}
       </Alert>
-
+      <Alert show={isError} variant="danger">
+            {responseString}
+      </Alert>
         <fieldset>
             <Form.Group as={Row} className="mb-3">
             <Form.Label as="legend" column sm={2}>

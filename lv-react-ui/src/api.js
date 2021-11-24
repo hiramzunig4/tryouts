@@ -7,7 +7,7 @@ function setConfigDhcp(config, cb) {
       })
       .then(res => res.json())
       .then(json => cb(json))
-      .catch(err => console.log(err))
+      .catch(err => cb(err))
 }
 
 function setConfigStatic(config, cb){
@@ -18,14 +18,14 @@ function setConfigStatic(config, cb){
       })
       .then(res => res.json())
       .then(json => cb(json))
-      .catch(err => console.log(err))
+      .catch(err => cb(err))
 }
 
 function getConfig(cb) {
     fetch("/net/state/eth0")
       .then(res => res.json())
       .then(json => cb(json))
-      .catch(err => console.log(err))
+      .catch(err => cb(err))
 }
 
 function getPing(cb) {
