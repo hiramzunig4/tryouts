@@ -36,3 +36,7 @@
     transform: rotate(360deg);
   }
 }
+
+.form-control-custom {
+  background-color: rgb(243, 208, 208);
+}

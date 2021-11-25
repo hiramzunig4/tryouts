@@ -40,6 +40,11 @@ function Network(){
   const [isValid, setIsValid] = useState(false);
   const [isError, setIsError] = useState(false);
 
+  const [customColorAddress, setCustomColorAddress] = React.useState("")
+  const [customColorGateway, setCustomColorGateway] = React.useState("")
+
+  const [statebuttonSetConfig, setStatebuttonSetConfig] = React.useState(false)
+
   function handleGetDropDownSelect(event)
   {
     console.log(event);
@@ -272,23 +277,45 @@ function Network(){
     return (false)  
   }  
 
-  function ValidateIPaddressTR(ipaddress) {  
-    if (/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(ipaddress)) {  
-        
-    }  
-    else
-    {
-      setResponseString(`Enter a Correct IP Address`)
-      setIsError(true)
-      setTimeout(() => {
-        setIsError(false)
-      }, 3000);
-      return
+  function ValidateInputForms(ipaddress, info, type) {  
+    switch(type) {
+      case "address":
+        if (/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(ipaddress)) {  
+          setCustomColorAddress("")
+        }  
+        else
+        {
+          setCustomColorAddress("form-control-custom")
+          setResponseString(info)
+          setIsError(true)
+          setTimeout(() => {
+            setIsError(false)
+          }, 3000);
+          return
+        }
+        break;
+      case "gateway":
+        if (/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(ipaddress)) {  
+          setCustomColorGateway("")
+        }  
+        else
+        {
+          setCustomColorGateway("form-control-custom")
+          setResponseString(info)
+          setIsError(true)
+          setTimeout(() => {
+            setIsError(false)
+          }, 3000);
+          return
+        }
+        break;
+      default:
+        // code block
     }
   } 
 
   return (
-    <Form>
+    <Form noValidate>
      <Card.Title as="h1">NETWORK</Card.Title>
       <Alert show={isValid} variant="success">
             {responseString}
@@ -326,12 +353,11 @@ function Network(){
             </Form.Label>
             <Col sm={8}>
             <Form.Control 
-              type="ipaddress" 
+              className={customColorAddress}
               id="IpAddress"
               disabled={IpAddressDisabled} 
               onChange={e => setAddress(e.target.value)}
-              onBlurCapture={e => ValidateIPaddressTR(address)}
-              value={address}
+              onBlurCapture={e => ValidateInputForms(address, "Enter a Correct IP Address", "address")}
               placeholder="IP address" />
             </Col>
         </Form.Group>
@@ -360,10 +386,12 @@ function Network(){
             </Form.Label>
             <Col sm={8}>
             <Form.Control 
+              className={customColorGateway}
               type="gateway"
               onChange={e => setGateway(e.target.value)}
               disabled={GatewayDisabled}  
               value={gateway} 
+              onBlurCapture={e => ValidateInputForms(gateway, "Enter a Correct Gateway", "gateway")}
               placeholder="Gateway" />
             </Col>
         </Form.Group>
@@ -405,7 +433,7 @@ function Network(){
         <Form.Group>
         <Col sm={{ span: 10, offset: 2 }}>
           <Stack direction="horizontal" gap={3}>
-            <Button onClick={buttonClickSetConfig}>Set Config</Button>
+            <Button disabled={statebuttonSetConfig}  onClick={buttonClickSetConfig}>Set Config</Button>
             <Button onClick={buttonClickGetConfig}>Get Config</Button>
             <Button onClick={buttonClickPing}>Ping</Button>
           </Stack>
