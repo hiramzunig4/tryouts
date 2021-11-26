@@ -17,11 +17,12 @@ function Empty() {
   const [stateradiodhcp, setStateRadioDhcp] = React.useState(true)
   const [stateradiostatic, setStateRadioStatic] = React.useState(false)
 
-  const [ form, setForm ] = useState({address:""})
+  const [ form, setForm ] = useState({address:"", gateway:""})
   const [ errors, setErrors ] = useState({})
 
   //disable componets
   const [ipaddressdisabled, setIpAddressdDisabled] = React.useState(true);
+  const [gatewaydisabled, setGatewayDisabled] = React.useState(true);
 
     //Response from yeico appliance
     const [responseString, setResponseString] = React.useState("")
@@ -40,6 +41,7 @@ function Empty() {
   function formState(state)
   {
     setIpAddressdDisabled(state)
+    setGatewayDisabled(state)
   }
 
   function dataToUi(key)
@@ -108,6 +110,7 @@ function Empty() {
           formState(false)
           console.log(dataToUi(res.message.config.ipv4.address))
           form.address = dataToUi(res.message.config.ipv4.address)
+          form.gateway = dataToUi(res.message.config.ipv4.gateway)
         }
         setResponseString(`Get Config Success`)
         setIsValid(true)
@@ -147,18 +150,19 @@ function Empty() {
       // We got errors!
       setErrors(newErrors)
     } else {
+      console.log(form.address)
+      console.log(form.gateway)
       // No errors! Put any logic here for the form submission!
       alert('Thank you for your feedback!')
     }
   }
   
   const findFormErrors = () => {
-    const { address } = form
+    const { address, gateway } = form
     const newErrors = {}
     // name errors
     if ( !address || address === '' || !validateIPaddress(address)) newErrors.address = 'Enter a correct address formart'
-
-
+    if ( !gateway || gateway === '' || !validateIPaddress(gateway)) newErrors.gateway = 'Enter a correct gateway formart'
     return newErrors
   }
 
@@ -206,6 +210,22 @@ function Empty() {
           />
           <Form.Control.Feedback type='invalid'>{ errors.address }</Form.Control.Feedback>
           </Col>
+        </Form.Group>
+
+        <Form.Group as={Row} className="mb-3">
+            <Form.Label align="right" column sm={2}>
+            Default Gateway
+            </Form.Label>
+            <Col sm={8}>
+            <Form.Control 
+              placeholder="Gateway"
+              onChange={  e => setField('gateway', e.target.value) }
+              isInvalid={ !!errors.gateway } 
+              disabled={gatewaydisabled} 
+              value={form.gateway}
+           />
+            <Form.Control.Feedback type='invalid'>{ errors.gateway }</Form.Control.Feedback>
+            </Col>
         </Form.Group>
 
         <Form.Group>
