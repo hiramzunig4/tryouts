@@ -43,8 +43,6 @@ function Network(){
   const [customColorAddress, setCustomColorAddress] = React.useState("")
   const [customColorGateway, setCustomColorGateway] = React.useState("")
 
-  const [statebuttonSetConfig, setStatebuttonSetConfig] = React.useState(false)
-
   function handleGetDropDownSelect(event)
   {
     console.log(event);
@@ -433,7 +431,7 @@ function Network(){
         <Form.Group>
         <Col sm={{ span: 10, offset: 2 }}>
           <Stack direction="horizontal" gap={3}>
-            <Button disabled={statebuttonSetConfig}  onClick={buttonClickSetConfig}>Set Config</Button>
+            <Button onClick={buttonClickSetConfig}>Set Config</Button>
             <Button onClick={buttonClickGetConfig}>Get Config</Button>
             <Button onClick={buttonClickPing}>Ping</Button>
           </Stack>
