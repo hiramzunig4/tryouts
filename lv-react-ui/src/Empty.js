@@ -17,21 +17,11 @@ function Empty() {
   const [stateradiodhcp, setStateRadioDhcp] = React.useState(true)
   const [stateradiostatic, setStateRadioStatic] = React.useState(false)
 
-  const [address, setAddress] = React.useState("");
-  const [addressError, setAddressError] = React.useState("");
-  const [netmask, setNetmask] = React.useState("255.255.255.0");
-  const [netmaskError, setNetmaskError] = React.useState();
-  const [gateway, setGateway] = React.useState("");
-  const [gatewayError, setGatewayError] = React.useState("");
-  const [someErrorInForm, setsomeErrorInForm] = React.useState(false);
-
+  const [ form, setForm ] = useState({address:""})
+  const [ errors, setErrors ] = useState({})
 
   //disable componets
-  const [gatewaydisabled, setGatewayDisabled] = React.useState(true);
-  const [netmaskdisabled, setSubnetmaskDisabled] = React.useState(true);
   const [ipaddressdisabled, setIpAddressdDisabled] = React.useState(true);
-  const [Dnsprimarydisabled, setDnsprimaryDisabled] = React.useState(true);
-  const [Dnssecondarydisabled, setDnsSecondaryDisabled] = React.useState(true);
 
     //Response from yeico appliance
     const [responseString, setResponseString] = React.useState("")
@@ -50,10 +40,6 @@ function Empty() {
   function formState(state)
   {
     setIpAddressdDisabled(state)
-    setSubnetmaskDisabled(state)
-    setGatewayDisabled(state)
-    setDnsprimaryDisabled(state)
-    setDnsSecondaryDisabled(state)
   }
 
   function dataToUi(key)
@@ -61,7 +47,6 @@ function Empty() {
     var addresswithpoints = `${JSON.stringify(key)}`.replace(/,/g,".")
     return addresswithpoints.replace(/[[\]']/g,"")
   }
-
 
    //manejo el estado los radios
   function clickSelectRadioButton(event)
@@ -77,8 +62,8 @@ function Empty() {
       formState(false)
     }
     setRadioSelected(event.target.id)
+    console.log(radioselected)
   }
-
   
   function buttonClickPing(){
     console.log("clicked in Ping")
@@ -108,12 +93,6 @@ function Empty() {
       console.log(res)
       if(res.result === "ok")
       {
-        setResponseString(`Get Config Success`)
-        setIsValid(true)
-        setTimeout(() => {
-          setIsValid(false)
-        }, 3000);
-  
         if(res.message.config.ipv4.method === "dhcp")
         {
           setRadioSelected("radiodhcp");
@@ -127,23 +106,14 @@ function Empty() {
           setStateRadioDhcp(false)
           setStateRadioStatic(true)
           formState(false)
-        
-          var addressIp = "";
-          switch(res.message.config.ipv4.prefix_length) {
-            case 8:
-              addressIp = "255.0.0.0"
-              break;
-            case 16:
-              addressIp = "255.255.0.0"
-              break;
-            default:
-              addressIp = "255.255.255.0"
-          }
-
-          setAddress(dataToUi(res.message.config.ipv4.address))
-          setNetmask(addressIp)
-          setGateway(dataToUi(res.message.config.ipv4.gateway))
+          console.log(dataToUi(res.message.config.ipv4.address))
+          form.address = dataToUi(res.message.config.ipv4.address)
         }
+        setResponseString(`Get Config Success`)
+        setIsValid(true)
+        setTimeout(() => {
+          setIsValid(false)
+        }, 3000);
       }
       //error en la respuesta
       else{
@@ -155,34 +125,41 @@ function Empty() {
       }
     })
   }
+
+  const setField = (field, value) => {
+    setForm({
+      ...form,
+      [field]: value
+    })
+    // Check and see if errors exist, and remove them from the error object:
+    if ( !!errors[field] ) setErrors({
+      ...errors,
+      [field]: null
+    })
+  }
   
   const buttonClickSetConfig = (event) => {
     event.preventDefault()
-    if ( !address || address === '' || !validateIPaddress(address))
-    {
-      setAddressError('Enter a correct IP formart')
-      setsomeErrorInForm(true)
-    } 
-    if ( !netmask || netmask === '' || !validateIPaddress(netmask)) setNetmaskError('Enter a correct netmask formart')
-    if ( !gateway || gateway === '' || !validateIPaddress(gateway)) setGatewayError('Enter a correct gateway formart')
-    /*
-    if(dnsprimary) 
-    {
-      if ( !dnsprimary || !validateIPaddress(dnsprimary)) newErrors.dnsprimary = 'Enter a correct dnsprimary formart'
+    // get our new errors
+    const newErrors = findFormErrors()
+    // Conditional logic:
+    if ( Object.keys(newErrors).length > 0 ) {
+      // We got errors!
+      setErrors(newErrors)
+    } else {
+      // No errors! Put any logic here for the form submission!
+      alert('Thank you for your feedback!')
     }
-    if(dnssecondary)
-    {
-      if ( !dnssecondary || !validateIPaddress(dnssecondary)) newErrors.dnssecondary = 'Enter a correct dnssecondary formart'
-    }
-    */
-    if(someErrorInForm)
-    {
-      return 
-    }
-    setAddressError('')
-    setNetmaskError('')
-    setGatewayError('')
-    alert('Thank you for your feedback!')
+  }
+  
+  const findFormErrors = () => {
+    const { address } = form
+    const newErrors = {}
+    // name errors
+    if ( !address || address === '' || !validateIPaddress(address)) newErrors.address = 'Enter a correct address formart'
+
+
+    return newErrors
   }
 
   return (
@@ -221,86 +198,14 @@ function Empty() {
           </Form.Label>
           <Col sm={8}>
           <Form.Control 
-            id="address"
             placeholder="IP address"
-            value={address} 
-            onChange={e => setAddress(e.target.value)}
+            onChange={ e => setField('address', e.target.value) }
+            isInvalid={ !!errors.address }
             disabled={ipaddressdisabled} 
-            isInvalid={ !!addressError} 
+            value={form.address}
           />
-          <Form.Control.Feedback type='invalid'>{ addressError }</Form.Control.Feedback>
+          <Form.Control.Feedback type='invalid'>{ errors.address }</Form.Control.Feedback>
           </Col>
-        </Form.Group>
-
-        <Form.Group as={Row} className="mb-3">
-            <Form.Label align="right" column sm={2}>
-            Select Netmask
-            </Form.Label>
-            <Col sm={2} align="left">
-            <Form.Control 
-              className="form-control-custom"
-              as="select" 
-              bsPrefix={"form-select"} //lo hace que salga la flecha para abajo
-              //value={netmask} si lo pongo ya no puedo seleccionar otros
-              disabled={netmaskdisabled} 
-              onChange={ e => setNetmask(e.target.value) }
-              isInvalid={ !!netmaskError } 
-            >
-              <option value="255.255.255.0">255.255.255.0</option>
-              <option value="255.255.0.0">255.255.0.0</option>
-              <option value="255.0.0.0">255.0.0.0</option>
-            </Form.Control>
-            <Form.Control.Feedback type='invalid'>{ netmaskError }</Form.Control.Feedback>
-          </Col>
-        </Form.Group>
-
-        <Form.Group as={Row} className="mb-3">
-            <Form.Label align="right" column sm={2}>
-            Default Gateway
-            </Form.Label>
-            <Col sm={8}>
-            <Form.Control 
-              id="gateway"
-              placeholder="Gateway"
-              value={gateway}
-              disabled={gatewaydisabled} 
-              onChange={  e => setGateway(e.target.value) }
-              isInvalid={ !!gatewayError } 
-           />
-            <Form.Control.Feedback type='invalid'>{ gatewayError }</Form.Control.Feedback>
-            </Col>
-        </Form.Group>
-
-        <Form.Group as={Row} className="mb-3">
-            <Form.Label align="right" column sm={2}>
-              Set DNS Servers:
-            </Form.Label>
-        </Form.Group>
-
-        <Form.Group as={Row} className="mb-3">
-            <Form.Label align="right" column sm={2}>
-            Primary
-            </Form.Label>
-            <Col sm={8}>
-            <Form.Control 
-              id="dnsprimary"
-              placeholder="Primary DNS"
-              disabled={Dnsprimarydisabled} 
-            />
-            </Col>
-        </Form.Group>
-
-        <Form.Group as={Row} className="mb-3">
-            <Form.Label align="right" column sm={2}>
-              Secondary
-            </Form.Label>
-            <Col sm={8}>
-            <Form.Control 
-             id="dnssecondary"
-             placeholder="Secondary DNS"
-             disabled={Dnssecondarydisabled} 
-            />
-            </Col>
         </Form.Group>
 
         <Form.Group>
