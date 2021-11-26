@@ -17,13 +17,14 @@ function Empty() {
   const [stateradiodhcp, setStateRadioDhcp] = React.useState(true)
   const [stateradiostatic, setStateRadioStatic] = React.useState(false)
 
-  const [ form, setForm ] = useState({address:"", gateway:"", netmask:""})
+  const [ form, setForm ] = useState({address:"", gateway:"", netmask:"", dnsprimary:""})
   const [ errors, setErrors ] = useState({})
 
   //disable componets
   const [ipaddressdisabled, setIpAddressdDisabled] = React.useState(true);
   const [gatewaydisabled, setGatewayDisabled] = React.useState(true);
   const [netmaskdisabled, setNetmaskDisabled] = React.useState(true);
+  const [dnsprimarydisabled, setDnsPrimaryDisabled] = React.useState(true);
 
     //Response from yeico appliance
     const [responseString, setResponseString] = React.useState("")
@@ -44,6 +45,7 @@ function Empty() {
     setIpAddressdDisabled(state)
     setGatewayDisabled(state)
     setNetmaskDisabled(state)
+    setDnsPrimaryDisabled(state)
   }
 
   function dataToUi(key)
@@ -110,10 +112,6 @@ function Empty() {
           setStateRadioDhcp(false)
           setStateRadioStatic(true)
           formState(false)
-          console.log(dataToUi(res.message.config.ipv4.address))
-          form.address = dataToUi(res.message.config.ipv4.address)
-          form.gateway = dataToUi(res.message.config.ipv4.gateway)
-         
           
           var addressIp = "";
           switch(res.message.config.ipv4.prefix_length) {
@@ -126,7 +124,22 @@ function Empty() {
             default:
               addressIp = "255.255.255.0"
           }
+          form.address = dataToUi(res.message.config.ipv4.address)
+          form.gateway = dataToUi(res.message.config.ipv4.gateway)
           form.netmask = addressIp
+          if(res.message.config.ipv4.name_servers.length >= 1)
+          {
+            console.log("al menos tiene un dns")
+            form.dnsprimary = dataToUi(res.message.config.ipv4.name_servers[0])
+          }
+          /*
+          if(res.message.config.ipv4.name_servers.length === 2)
+          {
+            console.log("al menos tiene un dns")
+            form.dnsprimary = dataToUi(res.message.config.ipv4.name_servers[0])
+          }
+          */
+          
         }
         setResponseString(`Get Config Success`)
         setIsValid(true)
@@ -169,18 +182,23 @@ function Empty() {
       console.log(form.address)
       console.log(form.gateway)
       console.log(form.netmask)
+      console.log(form.dnsprimary)
       // No errors! Put any logic here for the form submission!
       alert('Thank you for your feedback!')
     }
   }
   
   const findFormErrors = () => {
-    const { address, gateway, netmask } = form
+    const { address, gateway, netmask, dnsprimary} = form
     const newErrors = {}
     // name errors
     if ( !address || address === '' || !validateIPaddress(address)) newErrors.address = 'Enter a correct address formart'
     if ( !gateway || gateway === '' || !validateIPaddress(gateway)) newErrors.gateway = 'Enter a correct gateway formart'
     if ( !netmask || netmask === '' || !validateIPaddress(netmask)) newErrors.netmask = 'Enter a correct netmask formart'
+    if(dnsprimary) 
+    {
+      if ( !dnsprimary || !validateIPaddress(dnsprimary)) newErrors.dnsprimary = 'Enter a correct dnsprimary formart'
+    }
     return newErrors
   }
 
@@ -252,7 +270,6 @@ function Empty() {
           </Col>
         </Form.Group>
 
-
         <Form.Group as={Row} className="mb-3">
             <Form.Label align="right" column sm={2}>
             Default Gateway
@@ -264,8 +281,30 @@ function Empty() {
               isInvalid={ !!errors.gateway } 
               disabled={gatewaydisabled} 
               value={form.gateway}
-           />
+            />
             <Form.Control.Feedback type='invalid'>{ errors.gateway }</Form.Control.Feedback>
+            </Col>
+        </Form.Group>
+
+        <Form.Group as={Row} className="mb-3">
+            <Form.Label align="right" column sm={2}>
+              Set DNS Servers:
+            </Form.Label>
+        </Form.Group>
+
+        <Form.Group as={Row} className="mb-3">
+            <Form.Label align="right" column sm={2}>
+            Primary
+            </Form.Label>
+            <Col sm={8}>
+            <Form.Control 
+              placeholder="Primary DNS"
+              onChange={  e => setField('dnsprimary', e.target.value) }
+              isInvalid={ !!errors.dnsprimary } 
+              disabled={dnsprimarydisabled} 
+              value={form.dnsprimary}
+            />
+            <Form.Control.Feedback type='invalid'>{ errors.dnsprimary }</Form.Control.Feedback>
             </Col>
         </Form.Group>
 
