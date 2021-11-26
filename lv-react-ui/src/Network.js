@@ -309,9 +309,9 @@ function Network() {
               {responseString}
         </Alert>
         <Form.Group as={Row} className="mb-3">
-          <Form.Label as="legend" column sm={2}>
+          <Form.Label as="legend" column xs={1}>
           </Form.Label>
-          <Col sm={3} align="left">
+          <Col sm={2} align="left">
               <Form.Check
                 type="radio"
                 label="Obtain an IP address automatically"
@@ -330,10 +330,10 @@ function Network() {
         </Form.Group>
 
         <Form.Group as={Row} className="mb-2">
-          <Form.Label align="right" column sm={2}>
+          <Form.Label column xs={4}>
             IP Address
           </Form.Label>
-          <Col sm={8}>
+          <Col xs={6}>
           <Form.Control 
             placeholder="IP address"
             onChange={ e => setField('address', e.target.value) }
@@ -346,7 +346,7 @@ function Network() {
         </Form.Group>
 
         <Form.Group as={Row} className="mb-3">
-            <Form.Label align="right" column sm={2}>
+            <Form.Label align="right" column xs={1}>
             Select Netmask
             </Form.Label>
             <Col xs={2} align="left">
