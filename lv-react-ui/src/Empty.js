@@ -17,7 +17,7 @@ function Empty() {
   const [stateradiodhcp, setStateRadioDhcp] = React.useState(true)
   const [stateradiostatic, setStateRadioStatic] = React.useState(false)
 
-  const [ form, setForm ] = useState({address:"", gateway:"", netmask:"", dnsprimary:""})
+  const [ form, setForm ] = useState({address:"", gateway:"", netmask:"", dnsprimary:"", dnssecondary:""})
   const [ errors, setErrors ] = useState({})
 
   //disable componets
@@ -25,6 +25,7 @@ function Empty() {
   const [gatewaydisabled, setGatewayDisabled] = React.useState(true);
   const [netmaskdisabled, setNetmaskDisabled] = React.useState(true);
   const [dnsprimarydisabled, setDnsPrimaryDisabled] = React.useState(true);
+  const [dnssecondarydisabled, setDnsSecondaryDisabled] = React.useState(true);
 
     //Response from yeico appliance
     const [responseString, setResponseString] = React.useState("")
@@ -46,6 +47,7 @@ function Empty() {
     setGatewayDisabled(state)
     setNetmaskDisabled(state)
     setDnsPrimaryDisabled(state)
+    setDnsSecondaryDisabled(state)
   }
 
   function dataToUi(key)
@@ -132,14 +134,12 @@ function Empty() {
             console.log("al menos tiene un dns")
             form.dnsprimary = dataToUi(res.message.config.ipv4.name_servers[0])
           }
-          /*
+          
           if(res.message.config.ipv4.name_servers.length === 2)
           {
-            console.log("al menos tiene un dns")
-            form.dnsprimary = dataToUi(res.message.config.ipv4.name_servers[0])
+            console.log("tiene dos dns")
+            form.dnssecondary = dataToUi(res.message.config.ipv4.name_servers[1])
           }
-          */
-          
         }
         setResponseString(`Get Config Success`)
         setIsValid(true)
@@ -147,8 +147,7 @@ function Empty() {
           setIsValid(false)
         }, 3000);
       }
-      //error en la respuesta
-      else{
+      else{ //error en la respuesta
         setResponseString(`Get Config Error`)
         setIsError(true)
         setTimeout(() => {
@@ -178,18 +177,117 @@ function Empty() {
     if ( Object.keys(newErrors).length > 0 ) {
       // We got errors!
       setErrors(newErrors)
-    } else {
-      console.log(form.address)
-      console.log(form.gateway)
-      console.log(form.netmask)
-      console.log(form.dnsprimary)
+    } 
+    else { 
       // No errors! Put any logic here for the form submission!
-      alert('Thank you for your feedback!')
+      if(radioselected === "radiostatic")
+      {
+        console.log(`
+          address: ${form.address}
+          gateway: ${form.gateway}
+          netmask: ${form.netmask}
+          server primary: ${form.dnsprimary}
+          server secondary: ${form.dnssecondary}
+        `)
+
+        var maskNodes = form.netmask.match(/(\d+)/g);
+        var cidr = 0;
+        for(var i in maskNodes)
+        {
+          cidr += (((maskNodes[i] >>> 0).toString(2)).match(/1/g) || []).length;
+        }
+        console.log(cidr)
+        
+        var config=""
+        var dnsserver = []
+        //si los dos estan en blanco se envian sin pedos  
+        //"name_servers":[`${dnsserver[0]}`,`${dnsserver[1]}`]
+        //"name_servers":[]  cuando no hay nada en los dos
+        //"name_servers":[`${dnsserver[0]}`]
+        if(!form.dnsprimary && !form.dnssecondary)
+        {
+          console.log("No hay nada en ambos campos")
+          config = {
+            "method":"static", 
+            "address": `${form.address}`, 
+            "prefix_length":cidr, 
+            "gateway":  `${form.gateway}`, 
+            "name_servers":[]
+          }
+        }
+        if(form.dnsprimary && !form.dnssecondary)
+        {
+          console.log("Solo hay en el primary pero en el secondary no")
+          dnsserver.push(`${form.dnsprimary}`)
+          config = {
+            "method":"static", 
+            "address": `${form.address}`, 
+            "prefix_length":cidr, 
+            "gateway":  `${form.gateway}`, 
+            "name_servers":[`${dnsserver[0]}`]
+          }
+        }
+        if(form.dnsprimary && form.dnssecondary)
+        {
+          dnsserver.push(`${form.dnsprimary}`)
+          dnsserver.push(`${form.dnssecondary}`)
+          console.log("Hay en los dos")
+          config = {
+            "method":"static", 
+            "address": `${form.address}`, 
+            "prefix_length":cidr, 
+            "gateway":  `${form.gateway}`, 
+            "name_servers":[`${dnsserver[0]}`,`${dnsserver[1]}`]
+          }
+        }
+        console.log(JSON.stringify(config))
+        api.setConfigStatic(config, function(res){
+          if(res.result === "ok")
+          {
+            setResponseString(`Set Static Config Succes`)
+            setIsValid(true)
+            setTimeout(() => {
+              setIsValid(false)
+            }, 3000);
+          }
+          else{
+              setResponseString(`Set Static Config Error`)
+              setIsError(true)
+              setTimeout(() => {
+                setIsError(false)
+              }, 3000);
+            }
+        });
+      }
+      else{
+        console.log(radioselected)
+        const config = {
+          "method":"dhcp"
+        }
+        api.setConfigDhcp(config, function(res){
+          console.log(res)
+          if(res.result === "ok")
+          {
+            setResponseString(`Set Static Config Succes`)
+            setIsValid(true)
+            setTimeout(() => {
+              setIsValid(false)
+            }, 3000);
+          }
+          else{
+            setResponseString(`Set Static Config Error`)
+            setIsError(true)
+            setTimeout(() => {
+              setIsError(false)
+            }, 3000);
+          }
+        });
+      }
     }
   }
   
   const findFormErrors = () => {
-    const { address, gateway, netmask, dnsprimary} = form
+    const { address, gateway, netmask, dnsprimary, dnssecondary} = form
     const newErrors = {}
     // name errors
     if ( !address || address === '' || !validateIPaddress(address)) newErrors.address = 'Enter a correct address formart'
@@ -198,6 +296,10 @@ function Empty() {
     if(dnsprimary) 
     {
       if ( !dnsprimary || !validateIPaddress(dnsprimary)) newErrors.dnsprimary = 'Enter a correct dnsprimary formart'
+    }
+    if(dnssecondary) 
+    {
+      if ( !dnssecondary || !validateIPaddress(dnssecondary)) newErrors.dnssecondary = 'Enter a correct dnssecondary formart'
     }
     return newErrors
   }
@@ -305,6 +407,22 @@ function Empty() {
               value={form.dnsprimary}
             />
             <Form.Control.Feedback type='invalid'>{ errors.dnsprimary }</Form.Control.Feedback>
+            </Col>
+        </Form.Group>
+        
+        <Form.Group as={Row} className="mb-3">
+            <Form.Label align="right" column sm={2}>
+            Secondary
+            </Form.Label>
+            <Col sm={8}>
+            <Form.Control 
+              placeholder="Secondary DNS"
+              onChange={  e => setField('dnssecondary', e.target.value) }
+              isInvalid={ !!errors.dnssecondary } 
+              disabled={dnssecondarydisabled} 
+              value={form.dnssecondary}
+            />
+            <Form.Control.Feedback type='invalid'>{ errors.dnssecondary }</Form.Control.Feedback>
             </Col>
         </Form.Group>
 
