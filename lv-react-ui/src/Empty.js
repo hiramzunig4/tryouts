@@ -17,12 +17,13 @@ function Empty() {
   const [stateradiodhcp, setStateRadioDhcp] = React.useState(true)
   const [stateradiostatic, setStateRadioStatic] = React.useState(false)
 
-  const [ form, setForm ] = useState({address:"", gateway:""})
+  const [ form, setForm ] = useState({address:"", gateway:"", netmask:""})
   const [ errors, setErrors ] = useState({})
 
   //disable componets
   const [ipaddressdisabled, setIpAddressdDisabled] = React.useState(true);
   const [gatewaydisabled, setGatewayDisabled] = React.useState(true);
+  const [netmaskdisabled, setNetmaskDisabled] = React.useState(true);
 
     //Response from yeico appliance
     const [responseString, setResponseString] = React.useState("")
@@ -42,6 +43,7 @@ function Empty() {
   {
     setIpAddressdDisabled(state)
     setGatewayDisabled(state)
+    setNetmaskDisabled(state)
   }
 
   function dataToUi(key)
@@ -111,6 +113,20 @@ function Empty() {
           console.log(dataToUi(res.message.config.ipv4.address))
           form.address = dataToUi(res.message.config.ipv4.address)
           form.gateway = dataToUi(res.message.config.ipv4.gateway)
+         
+          
+          var addressIp = "";
+          switch(res.message.config.ipv4.prefix_length) {
+            case 8:
+              addressIp = "255.0.0.0"
+              break;
+            case 16:
+              addressIp = "255.255.0.0"
+              break;
+            default:
+              addressIp = "255.255.255.0"
+          }
+          form.netmask = addressIp
         }
         setResponseString(`Get Config Success`)
         setIsValid(true)
@@ -152,17 +168,19 @@ function Empty() {
     } else {
       console.log(form.address)
       console.log(form.gateway)
+      console.log(form.netmask)
       // No errors! Put any logic here for the form submission!
       alert('Thank you for your feedback!')
     }
   }
   
   const findFormErrors = () => {
-    const { address, gateway } = form
+    const { address, gateway, netmask } = form
     const newErrors = {}
     // name errors
     if ( !address || address === '' || !validateIPaddress(address)) newErrors.address = 'Enter a correct address formart'
     if ( !gateway || gateway === '' || !validateIPaddress(gateway)) newErrors.gateway = 'Enter a correct gateway formart'
+    if ( !netmask || netmask === '' || !validateIPaddress(netmask)) newErrors.netmask = 'Enter a correct netmask formart'
     return newErrors
   }
 
@@ -211,6 +229,29 @@ function Empty() {
           <Form.Control.Feedback type='invalid'>{ errors.address }</Form.Control.Feedback>
           </Col>
         </Form.Group>
+
+        <Form.Group as={Row} className="mb-3">
+            <Form.Label align="right" column sm={2}>
+            Select Netmask
+            </Form.Label>
+            <Col xs={2} align="left">
+            <Form.Control 
+              className="form-control-custom" //hace que el color se vea gris en el css custom
+              as="select" 
+              bsPrefix={"form-select"} //lo hace que salga la flecha para abajo
+              onChange={ e => setField('netmask', e.target.value) }
+              isInvalid={ !!errors.netmask }
+              disabled={netmaskdisabled} 
+              value={form.netmask}
+            >
+              <option value="255.255.255.0">255.255.255.0</option>
+              <option value="255.255.0.0">255.255.0.0</option>
+              <option value="255.0.0.0">255.0.0.0</option>
+            </Form.Control>
+            <Form.Control.Feedback type='invalid'>{  errors.netmask }</Form.Control.Feedback>
+          </Col>
+        </Form.Group>
+
 
         <Form.Group as={Row} className="mb-3">
             <Form.Label align="right" column sm={2}>
