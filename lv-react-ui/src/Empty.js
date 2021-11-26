@@ -12,7 +12,7 @@ import Button from 'react-bootstrap/Button'
 function Empty() {
  
   //form validation
-  const [ form, setForm ] = useState({})
+  const [ form, setForm ] = useState({netmask:"255.255.255.0"})
   const [ errors, setErrors ] = useState({})
 
   //radio selector
@@ -46,14 +46,16 @@ function Empty() {
     if ( !address || address === '' || !validateIPaddress(address)) newErrors.address = 'Enter a correct IP formart'
     if ( !netmask || netmask === '' || !validateIPaddress(netmask)) newErrors.netmask = 'Enter a correct netmask formart'
     if ( !gateway || gateway === '' || !validateIPaddress(gateway)) newErrors.gateway = 'Enter a correct gateway formart'
-    if((dnsprimary === "") === false) //si no tiene escrito nada
+    console.log(dnsprimary)
+    if(dnsprimary) 
     {
-      if ( !dnsprimary || dnsprimary === "" || !validateIPaddress(dnsprimary)) newErrors.dnsprimary = 'Enter a correct dns primary formart'
+      if ( !dnsprimary || !validateIPaddress(dnsprimary)) newErrors.dnsprimary = 'Enter a correct dnsprimary formart'
     }
-    if((dnssecondary === "") === false)
+    if(dnssecondary)
     {
-      if ( !dnssecondary || dnssecondary === "" || !validateIPaddress(dnssecondary)) newErrors.dnssecondary = 'Enter a correct dns secondary formart'
+      if ( !dnssecondary || !validateIPaddress(dnssecondary)) newErrors.dnssecondary = 'Enter a correct dnssecondary formart'
     }
+
     return newErrors
   }
 
@@ -151,7 +153,7 @@ function Empty() {
             <Form.Label align="right" column sm={2}>
             Subnet Mask
             </Form.Label>
-            <Col sm={1} align="left">
+            <Col sm={2} align="left">
             <Form.Control 
               //className="form-control-custom"
               as='select' 
