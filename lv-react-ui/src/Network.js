@@ -354,6 +354,7 @@ function Network(){
               className={customColorAddress}
               id="IpAddress"
               disabled={IpAddressDisabled} 
+              value={address} 
               onChange={e => setAddress(e.target.value)}
               onBlurCapture={e => ValidateInputForms(address, "Enter a Correct IP Address", "address")}
               placeholder="IP address" />
