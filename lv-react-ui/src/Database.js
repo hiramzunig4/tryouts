@@ -1,116 +1,29 @@
 import './App.css';
-import api from "./api"
 import React from "react";
 
-
-function clickHandler(){
-    console.log("clicked in Ping");
-    api.getPing(function(res){
-      console.log(res)
-    })
-  }
-  
-  function clickHandlerEth0(){
-    console.log("clicked in get config");
-    api.getConfig(function(res){
-      console.log(res)
-    })
-  }
-  
-  function clickHandlerEth0Dhcp(){
-    console.log("clicked in set dhcp");
-    const config = {
-      "method":"dhcp", 
-    }
-    api.setConfigDhcp(config, function(res){
-      console.log(res)
-    })
-  }
+import Row from 'react-bootstrap/Row'
+import Col from 'react-bootstrap/Col'
+import Form from 'react-bootstrap/Form'
+import Button from 'react-bootstrap/Button'
 
 function Database()
-{
-    const [address, setAddress] = React.useState("");
-    const [netmask, setNetmask] = React.useState("");
-    const [gateway, setGateway] = React.useState("");
-    const [servers, setServers] = React.useState("");
-  
-    const handleSubmit = (event) => {
-      event.preventDefault();
-      console.log(`
-        address: ${address}
-        netMask: ${netmask}
-        gateway: ${gateway}
-        servers: ${servers}
-      `);
-      const config = {
-        "method":"static", 
-        "address": address, 
-        "prefix_length":8, 
-        "gateway": gateway, 
-        "name_servers":[servers]
-      }
-      api.setConfigStatic(config, function(res){
-        console.log(res)
-      });
-    }
-  
-    return (
-      <div className="App">
-        <button onClick={clickHandler}> Ping </button>
-        <div className="App2">
-          <button onClick={clickHandlerEth0}> Get Config Eth0 </button>  
-        </div>
-        <div className="App3">
-          <button onClick={clickHandlerEth0Dhcp}> Set DHCP in ETH0 </button>  
-        </div>
-        <form onSubmit={handleSubmit}>
-          <h1>Netowrk</h1>
-  
-          <label>
-            Address:
-            <input
-              name="address"
-              type="address"
-              value={address}
-              onChange={e => setAddress(e.target.value)}
-              required />
-          </label>
-  
-          <label>
-            Netmask:
-            <input
-              name="netmask"
-              type="netmask"
-              value={netmask}
-              onChange={e => setNetmask(e.target.value)}
-              required />
-          </label>
-  
-          <label>
-            Gateway:
-            <input
-              name="gateway"
-              type="gateway"
-              value={gateway}
-              onChange={e => setGateway(e.target.value)}
-              required />
-          </label>
-  
-          <label>
-            Server:
-            <input
-              name="servers"
-              type="servers"
-              value={servers}
-              onChange={e => setServers(e.target.value)}
-              required />
-          </label>
-  
-          <button>Submit</button>
-  
-      </form>
-      </div>
-    );
+{ 
+  return (
+    <Form>
+      <h1>DATABASE</h1>
+      <Row>
+        <Col xs={6} md={8}>
+          <Form.Label align="left">Select folder to backup</Form.Label>
+        </Col>
+        <Col xs={12} md={8}>
+        <Form.Control type="file" onChange={(e) => console.log(e.target.files)} />
+        </Col>
+        <Col xs={12} md={8}>
+        <Col><Button>Backup</Button></Col>
+        </Col>
+      </Row>
+    </Form>
+  );
 }
 
 export default Database;

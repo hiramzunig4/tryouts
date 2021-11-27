@@ -129,13 +129,13 @@ function Network() {
           form.address = dataToUi(res.message.config.ipv4.address)
           form.gateway = dataToUi(res.message.config.ipv4.gateway)
           form.netmask = addressIp
-          if(res.message.config.ipv4.name_servers.length >= 1)
+          if(res.message.config.ipv4.name_servers.length > 0)
           {
             console.log("al menos tiene un dns")
             form.dnsprimary = dataToUi(res.message.config.ipv4.name_servers[0])
           }
           
-          if(res.message.config.ipv4.name_servers.length === 2)
+          if(res.message.config.ipv4.name_servers.length > 1)
           {
             console.log("tiene dos dns")
             form.dnssecondary = dataToUi(res.message.config.ipv4.name_servers[1])
@@ -309,9 +309,9 @@ function Network() {
               {responseString}
         </Alert>
         <Form.Group as={Row} className="mb-3">
-          <Form.Label as="legend" column xs={1}>
+          <Form.Label as="legend" column sm={2}>
           </Form.Label>
-          <Col sm={2} align="left">
+          <Col sm={3} align="left">
               <Form.Check
                 type="radio"
                 label="Obtain an IP address automatically"
@@ -330,10 +330,10 @@ function Network() {
         </Form.Group>
 
         <Form.Group as={Row} className="mb-2">
-          <Form.Label column xs={4}>
+          <Form.Label align="right" column sm={2}>
             IP Address
           </Form.Label>
-          <Col xs={6}>
+          <Col sm={8}>
           <Form.Control 
             placeholder="IP address"
             onChange={ e => setField('address', e.target.value) }
@@ -346,7 +346,7 @@ function Network() {
         </Form.Group>
 
         <Form.Group as={Row} className="mb-3">
-            <Form.Label align="right" column xs={1}>
+            <Form.Label align="right" column sm={2}>
             Select Netmask
             </Form.Label>
             <Col xs={2} align="left">
@@ -430,7 +430,6 @@ function Network() {
             </Stack>
           </Col>
         </Form.Group>
-
       </Form>
   )
 } 

@@ -35,10 +35,10 @@ function getPing(cb) {
 }
 
 const exports = {
-    setConfigDhcp: setConfigDhcp,
-    getConfig: getConfig,
-    getPing: getPing, 
-    setConfigStatic: setConfigStatic,
+    setConfigDhcp,
+    getConfig,
+    getPing, 
+    setConfigStatic,
 }
 
 export default exports
