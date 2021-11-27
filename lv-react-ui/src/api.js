@@ -1,4 +1,4 @@
-function setConfigDhcp(config, cb) {
+function setNetworkConfigDhcp(config, cb) {
     fetch("/net/setup/eth0", {
         method: "post",
         body: JSON.stringify(config),
@@ -9,7 +9,7 @@ function setConfigDhcp(config, cb) {
       .catch(err => cb(err))
 }
 
-function setConfigStatic(config, cb){
+function setNetworkConfigStatic(config, cb){
     fetch("/net/setup/eth0", {
         method: "post",
         body: JSON.stringify(config),
@@ -20,14 +20,14 @@ function setConfigStatic(config, cb){
       .catch(err => cb(err))
 }
 
-function getConfig(cb) {
+function getNetworkConfig(cb) {
     fetch("/net/state/eth0")
       .then(res => res.json())
       .then(json => cb(json))
       .catch(err => cb(err))
 }
 
-function getPing(cb) {
+function getNetworkPing(cb) {
     fetch("/ping")
       .then(res => res.json())
       .then(json => cb(json))
@@ -35,10 +35,10 @@ function getPing(cb) {
 }
 
 const exports = {
-    setConfigDhcp,
-    getConfig,
-    getPing, 
-    setConfigStatic,
+    setNetworkConfigDhcp,
+    getNetworkConfig,
+    getNetworkPing, 
+    setNetworkConfigStatic,
 }
 
 export default exports

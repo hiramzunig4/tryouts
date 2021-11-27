@@ -13,26 +13,27 @@ import Button from 'react-bootstrap/Button'
 
 function Network() {
   //radio selector
-  const [radioselected, setRadioSelected] = React.useState("radiodhcp")
-  const [stateradiodhcp, setStateRadioDhcp] = React.useState(true)
-  const [stateradiostatic, setStateRadioStatic] = React.useState(false)
+  const [radioSelected, setRadioSelected] = React.useState("radiodhcp")
+  const [stateRadioDhcp, setStateRadioDhcp] = React.useState(true)
+  const [stateRadioStatic, setStateRadioStatic] = React.useState(false)
 
+  //Errors
   const [ form, setForm ] = useState({address:"", gateway:"", netmask:"255.255.255.0", dnsprimary:"", dnssecondary:""})
-  const [ errors, setErrors ] = useState({})
+  const [ errors, setErrors ] = useState({address:"", gateway:"", netmask:"", dnsprimary:"", dnssecondary:""})
 
   //disable componets
-  const [ipaddressdisabled, setIpAddressdDisabled] = React.useState(true);
-  const [gatewaydisabled, setGatewayDisabled] = React.useState(true);
-  const [netmaskdisabled, setNetmaskDisabled] = React.useState(true);
-  const [dnsprimarydisabled, setDnsPrimaryDisabled] = React.useState(true);
-  const [dnssecondarydisabled, setDnsSecondaryDisabled] = React.useState(true);
+  const [ipAddressDisabled, setIpAddressdDisabled] = React.useState(true);
+  const [gatewayDisabled, setGatewayDisabled] = React.useState(true);
+  const [netmaskDisabled, setNetmaskDisabled] = React.useState(true);
+  const [dnsPrimaryDisabled, setDnsPrimaryDisabled] = React.useState(true);
+  const [dnsSecondaryDisabled, setDnsSecondaryDisabled] = React.useState(true);
 
-    //Response from yeico appliance
-    const [responseString, setResponseString] = React.useState("")
-  
-    //Alerts
-    const [isValid, setIsValid] = useState(false);
-    const [isError, setIsError] = useState(false);
+  //Response from yeico appliance
+  const [responseString, setResponseString] = React.useState("")
+
+  //Alerts
+  const [isValid, setIsValid] = useState(false);
+  const [isError, setIsError] = useState(false);
   
   function validateIPaddress(ipaddress) {  
     if (/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(ipaddress)) {  
@@ -41,7 +42,7 @@ function Network() {
     return (false)  
   }  
 
-  function formState(state)
+  function setDisabledComponents(state)
   {
     setIpAddressdDisabled(state)
     setGatewayDisabled(state)
@@ -50,32 +51,32 @@ function Network() {
     setDnsSecondaryDisabled(state)
   }
 
-  function dataToUi(key)
+  function parseIP(key)
   {
     var addresswithpoints = `${JSON.stringify(key)}`.replace(/,/g,".")
     return addresswithpoints.replace(/[[\]']/g,"")
   }
 
-   //manejo el estado los radios
-  function clickSelectRadioButton(event)
+   //manage state radios
+  function ButtonSelectRadio_Click(event)
   {
     if(event.target.id === "radiodhcp"){
       setStateRadioDhcp(true)
       setStateRadioStatic(false)
-      formState(true)
+      setDisabledComponents(true)
     }
     else{
       setStateRadioDhcp(false)
       setStateRadioStatic(true)
-      formState(false)
+      setDisabledComponents(false)
     }
     setRadioSelected(event.target.id)
-    console.log(radioselected)
+    console.log(radioSelected)
   }
   
-  function buttonClickPing(){
+  function ButtonPing_Click(){
     console.log("clicked in Ping")
-    api.getPing(function(res){
+    api.getNetworkPing(function(res){
       console.log(`Respuesta del ping ${JSON.stringify(res)}`)
       if(res.result === "ok")
       {
@@ -95,9 +96,9 @@ function Network() {
     })
   }
 
-  function buttonClickGetConfig(){
+  function ButtonGetNetworkConfig_Click(){
     console.log("clicked in get config");
-    api.getConfig(function(res){
+    api.getNetworkConfig(function(res){
       console.log(res)
       if(res.result === "ok")
       {
@@ -106,14 +107,14 @@ function Network() {
           setRadioSelected("radiodhcp");
           setStateRadioDhcp(true)
           setStateRadioStatic(false)
-          formState(true)
+          setDisabledComponents(true)
         }
-        else //es estatica
+        else //is static
         { 
           setRadioSelected("radiostatic");
           setStateRadioDhcp(false)
           setStateRadioStatic(true)
-          formState(false)
+          setDisabledComponents(false)
           
           var addressIp = "";
           switch(res.message.config.ipv4.prefix_length) {
@@ -126,19 +127,17 @@ function Network() {
             default:
               addressIp = "255.255.255.0"
           }
-          form.address = dataToUi(res.message.config.ipv4.address)
-          form.gateway = dataToUi(res.message.config.ipv4.gateway)
+          form.address = parseIP(res.message.config.ipv4.address)
+          form.gateway = parseIP(res.message.config.ipv4.gateway)
           form.netmask = addressIp
           if(res.message.config.ipv4.name_servers.length > 0)
           {
-            console.log("al menos tiene un dns")
-            form.dnsprimary = dataToUi(res.message.config.ipv4.name_servers[0])
+            form.dnsprimary = parseIP(res.message.config.ipv4.name_servers[0])
           }
           
           if(res.message.config.ipv4.name_servers.length > 1)
           {
-            console.log("tiene dos dns")
-            form.dnssecondary = dataToUi(res.message.config.ipv4.name_servers[1])
+            form.dnssecondary = parseIP(res.message.config.ipv4.name_servers[1])
           }
         }
         setResponseString(`Get Config Success`)
@@ -147,7 +146,7 @@ function Network() {
           setIsValid(false)
         }, 3000);
       }
-      else{ //error en la respuesta
+      else{ //is error in the response
         setResponseString(`Get Config Error`)
         setIsError(true)
         setTimeout(() => {
@@ -169,10 +168,10 @@ function Network() {
     })
   }
   
-  const buttonClickSetConfig = (event) => {
+  const ButtonSetNetworkConfig_Click = (event) => {
     event.preventDefault()
-    //la configuracion es estatica
-    if(radioselected === "radiostatic"){
+    //the config is static
+    if(radioSelected === "radiostatic"){
       // get our new errors
       const newErrors = findFormErrors()
       // Conditional logic:
@@ -198,10 +197,6 @@ function Network() {
         
         var config=""
         var dnsserver = []
-        //si los dos estan en blanco se envian sin pedos  
-        //"name_servers":[`${dnsserver[0]}`,`${dnsserver[1]}`]
-        //"name_servers":[]  cuando no hay nada en los dos
-        //"name_servers":[`${dnsserver[0]}`]
         if(!form.dnsprimary && !form.dnssecondary)
         {
           config = {
@@ -236,7 +231,7 @@ function Network() {
           }
         }
         console.log(JSON.stringify(config))
-        api.setConfigStatic(config, function(res){
+        api.setNetworkConfigStatic(config, function(res){
           if(res.result === "ok")
           {
             setResponseString(`Set Static Config Succes`)
@@ -256,11 +251,11 @@ function Network() {
       }
     }
   else{
-    console.log(radioselected)
+    console.log(radioSelected)
     const config = {
       "method":"dhcp"
     }
-    api.setConfigDhcp(config, function(res){
+    api.setNetworkConfigDhcp(config, function(res){
       console.log(res)
       if(res.result === "ok")
       {
@@ -316,15 +311,15 @@ function Network() {
                 type="radio"
                 label="Obtain an IP address automatically"
                 id="radiodhcp"
-                onChange={clickSelectRadioButton}
-                checked={stateradiodhcp}
+                onChange={ButtonSelectRadio_Click}
+                checked={stateRadioDhcp}
               />
               <Form.Check
                 type="radio"
                 label="Use the following IP address:"
                 id="radiostatic"
-                onChange={clickSelectRadioButton}
-                checked={stateradiostatic}
+                onChange={ButtonSelectRadio_Click}
+                checked={stateRadioStatic}
               />
           </Col>
         </Form.Group>
@@ -338,7 +333,7 @@ function Network() {
             placeholder="IP address"
             onChange={ e => setField('address', e.target.value) }
             isInvalid={ !!errors.address }
-            disabled={ipaddressdisabled} 
+            disabled={ipAddressDisabled} 
             value={form.address}
           />
           <Form.Control.Feedback type='invalid'>{ errors.address }</Form.Control.Feedback>
@@ -351,12 +346,12 @@ function Network() {
             </Form.Label>
             <Col xs={2} align="left">
             <Form.Control 
-              className="form-control-custom" //hace que el color se vea gris en el css custom
+              className="form-control-custom" //makes gray the control
               as="select" 
-              bsPrefix={"form-select"} //lo hace que salga la flecha para abajo
+              bsPrefix={"form-select"} //shows the control like a combobox
               onChange={ e => setField('netmask', e.target.value) }
               isInvalid={ !!errors.netmask }
-              disabled={netmaskdisabled} 
+              disabled={netmaskDisabled} 
               value={form.netmask}
             >
               <option value="255.255.255.0">255.255.255.0</option>
@@ -376,7 +371,7 @@ function Network() {
               placeholder="Gateway"
               onChange={  e => setField('gateway', e.target.value) }
               isInvalid={ !!errors.gateway } 
-              disabled={gatewaydisabled} 
+              disabled={gatewayDisabled} 
               value={form.gateway}
             />
             <Form.Control.Feedback type='invalid'>{ errors.gateway }</Form.Control.Feedback>
@@ -398,7 +393,7 @@ function Network() {
               placeholder="Primary DNS"
               onChange={  e => setField('dnsprimary', e.target.value) }
               isInvalid={ !!errors.dnsprimary } 
-              disabled={dnsprimarydisabled} 
+              disabled={dnsPrimaryDisabled} 
               value={form.dnsprimary}
             />
             <Form.Control.Feedback type='invalid'>{ errors.dnsprimary }</Form.Control.Feedback>
@@ -414,7 +409,7 @@ function Network() {
               placeholder="Secondary DNS"
               onChange={  e => setField('dnssecondary', e.target.value) }
               isInvalid={ !!errors.dnssecondary } 
-              disabled={dnssecondarydisabled} 
+              disabled={dnsSecondaryDisabled} 
               value={form.dnssecondary}
             />
             <Form.Control.Feedback type='invalid'>{ errors.dnssecondary }</Form.Control.Feedback>
@@ -424,9 +419,9 @@ function Network() {
         <Form.Group>
           <Col sm={{ span: 10, offset: 2 }}>
             <Stack direction="horizontal" gap={3}>
-              <Button onClick={buttonClickSetConfig}>Set Config</Button>
-              <Button onClick={buttonClickGetConfig}>Get Config</Button>
-              <Button onClick={buttonClickPing}>Ping</Button>
+              <Button onClick={ButtonSetNetworkConfig_Click}>Set Config</Button>
+              <Button onClick={ButtonGetNetworkConfig_Click}>Get Config</Button>
+              <Button onClick={ButtonPing_Click}>Ping</Button>
             </Stack>
           </Col>
         </Form.Group>
