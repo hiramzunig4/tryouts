@@ -10,6 +10,10 @@ const checkIpAddress = function(ip, errors, name) {
         addToErrors(errors, name, "IP cannot be empty")
         return
     }
+    if (/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(ip) == false) {  
+        addToErrors(errors, name, "Enter a correct ip structure")
+        return
+    } 
 }
 
 const validateNetConfig = function(input) {
@@ -20,7 +24,7 @@ const validateNetConfig = function(input) {
         output.config = {"method":"dhcp"}
         return errors.count > 0 ? errors : output
         case "static":
-        checkIpAddress(input.address, errors, "address")
+            checkIpAddress(input.address, errors, "address")
         return errors.count > 0 ? errors : output
         default:
             errors.input = `Invalid config type ${input.type}`
