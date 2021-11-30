@@ -1,5 +1,4 @@
-import { generatePrime } from 'crypto'
-import { Netmask } from 'netmask'
+import { Netmask } from 'netmask' //https://stackoverflow.com/questions/503052/javascript-is-ip-in-one-of-these-subnets
 
 const addToError = function (result, name, message) {
     result.errors[name] = message
@@ -8,7 +7,7 @@ const addToError = function (result, name, message) {
 
 const checkIpStructure = function (result, ip, name) {
     ip = ip || ""
-    if (ip.trim().length == 0) {
+    if (ip.trim().length === 0) {
         addToError(result, name, "IP cannot be empty")
         return
     }
@@ -46,7 +45,7 @@ const checkGatewayIsinNetmask = function (result, gateway, ipNetmask, name) {
 }
 
 const validateNetConfig = function (input) {
-    const result = { count: 0, errors: {} }
+    const result = { count: 0, errors: {}, input }
     switch (input.method) {
         case "dhcp":
             break

@@ -3,6 +3,7 @@ import { useState } from 'react'
 import './App.css';
 import api from "./api"
 import React from "react"
+import Validation from './Validation'
 
 import Col from 'react-bootstrap/Col'
 import Row from 'react-bootstrap/Row'
@@ -219,7 +220,50 @@ function Network() {
           }
         }
         console.log(JSON.stringify(config))
-        api.setNetworkConfigStatic(config, function (res) {
+        let result = Validation.validateNetConfig(config)
+        if (result.count > 0) {
+          setResponseString(Object.values(result.errors)[0])
+          setIsError(true)
+          setTimeout(() => {
+            setIsError(false)
+          }, 3000);
+        }
+        else {
+          api.setNetworkConfigStatic(result.input, function (res) {
+            if (res.result === "ok") {
+              setResponseString(`Set Static Config Succes`)
+              setIsValid(true)
+              setTimeout(() => {
+                setIsValid(false)
+              }, 3000);
+            }
+            else {
+              setResponseString(`Set Static Config Error`)
+              setIsError(true)
+              setTimeout(() => {
+                setIsError(false)
+              }, 3000);
+            }
+          });
+        }
+      }
+    }
+    else {
+      console.log(radioSelected)
+      const config = {
+        "method": "dhcp"
+      }
+      let result = Validation.validateNetConfig(config)
+      if (result.count > 0) {
+        setResponseString(`Error in config`)
+        setIsError(true)
+        setTimeout(() => {
+          setIsError(false)
+        }, 3000);
+      }
+      else {
+        api.setNetworkConfigDhcp(result.input, function (res) {
+          console.log(res)
           if (res.result === "ok") {
             setResponseString(`Set Static Config Succes`)
             setIsValid(true)
@@ -236,29 +280,6 @@ function Network() {
           }
         });
       }
-    }
-    else {
-      console.log(radioSelected)
-      const config = {
-        "method": "dhcp"
-      }
-      api.setNetworkConfigDhcp(config, function (res) {
-        console.log(res)
-        if (res.result === "ok") {
-          setResponseString(`Set Static Config Succes`)
-          setIsValid(true)
-          setTimeout(() => {
-            setIsValid(false)
-          }, 3000);
-        }
-        else {
-          setResponseString(`Set Static Config Error`)
-          setIsError(true)
-          setTimeout(() => {
-            setIsError(false)
-          }, 3000);
-        }
-      });
     }
   }
 
