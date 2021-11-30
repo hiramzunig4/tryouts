@@ -1,59 +1,60 @@
-const addToErrors = function(errors, name, message) {
-    errors[name] = message
-    errors.count ++
+const addToError = function(result, name, message) {
+    result.errors[name] = message
+    result.count ++
 }
 
-const checkIpStructure = function(ip, errors, name) {
+const checkIpStructure = function(result, ip, name) {
     ip = ip || ""
     if (ip.trim().length == 0) {
-        addToErrors(errors, name, "IP cannot be empty")
+        addToError(result, name, "IP cannot be empty")
         return
     }
     if (/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(ip) === false) {  
-        addToErrors(errors, name, "Enter a correct IP structure")
+        addToError(result, name, "IP has invalid format")
         return
     } 
 }
 
-const checkPrefixLengthisNumber = function(prefixLength, errors, name) {
+const checkPrefixLength = function(result, prefixLength, name) {
     if (!Number.isInteger(prefixLength)) {
-        addToErrors(errors, name, "Prefix length should be a number")
+        addToError(result, name, "Prefix length should be a number")
+        return
+    }
+    if ([8,16,24].indexOf(prefixLength) < 0) {
+        addToError(result, name, "Invalida prefix length")
+        return
+    }
+}
+
+const checkNameServersLength = function(result, length, name) {
+    if ([0,1,2].indexOf(length) < 0) {
+        addToError(result, name, "Invalid name servers length")
         return
     }
 }
 
 const validateNetConfig = function(input) {
-    const errors = {type: "errors", count: 0}
-    const output = {type: "output"}
-    const servers = []
-    switch (input.type) {
+    const result = {count: 0, errors: {}}
+    switch (input.method) {
         case "dhcp":
-            output.config = {"method":"dhcp"}
-        return errors.count > 0 ? errors : output
+            break
         case "static":
-            checkIpStructure(input.address, errors, "address")
-            checkPrefixLengthisNumber(input.prefix_length, errors, "prefix_length")
-            checkIpStructure(input.gateway, errors, "gateway")
+            checkIpStructure(result, input.address, "address")
+            checkPrefixLength(result, input.prefix_length, "prefix_length")
+            checkIpStructure(result, input.gateway, "gateway")
+            checkNameServersLength(result, input.name_servers.length, "nameservers_length")
             if(input.name_servers.length > 0){
-                checkIpStructure(input.name_servers[0], errors, "dnsprimary")
-                servers.push(input.name_servers[0])
+                checkIpStructure(result, input.name_servers[0], "dnsprimary")
             }
             if(input.name_servers.length > 1){
-                checkIpStructure(input.name_servers[1], errors, "dnssecondary")
-                servers.push(input.name_servers[1])
+                checkIpStructure(result, input.name_servers[1], "dnssecondary")
             }
-            output.config = {
-                method: input.type,
-                address:input.address, 
-                prefix_length:input.prefix_length, 
-                gateway:  input.gateway, 
-                name_servers:servers
-            }
-        return errors.count > 0 ? errors : output
+            break
         default:
-            errors.input = `Invalid config type ${input.type}`
-            return errors
+            addToError(result, "method", "invalid method")
+            break
         }
+    return result
 }
 
 const exports = {
