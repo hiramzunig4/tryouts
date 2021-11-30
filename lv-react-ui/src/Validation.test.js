@@ -38,7 +38,6 @@ test('net config static address required', () => {
     expect(result.errors.address).toBe("IP cannot be empty")
 })
 
-
 test('net config static invalid ip address', () => {
     let input = {
         method: "static",

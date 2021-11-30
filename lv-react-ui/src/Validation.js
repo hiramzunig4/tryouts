@@ -1,19 +1,16 @@
 import { Netmask } from 'netmask' //https://stackoverflow.com/questions/503052/javascript-is-ip-in-one-of-these-subnets
+import ValidationIp from './ValidationIp'
 
 const addToError = function (result, name, message) {
     result.errors[name] = message
     result.count++
 }
 
-const checkIpStructure = function (result, ip, name) {
+const validateIpStructure = function (result, ip, name) {
     ip = ip || ""
-    if (ip.trim().length === 0) {
-        addToError(result, name, "IP cannot be empty")
-        return
-    }
-    if (/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(ip) === false) {
-        addToError(result, name, "IP has invalid format")
-        return
+    let error = ValidationIp.validateIp(ip)
+    if (error) {
+        addToError(result, name, error)
     }
 }
 
@@ -50,18 +47,18 @@ const validateNetConfig = function (input) {
         case "dhcp":
             break
         case "static":
-            checkIpStructure(result, input.address, "address")
+            validateIpStructure(result, input.address, "address")
             checkPrefixLength(result, input.prefix_length, "prefix_length")
-            checkIpStructure(result, input.gateway, "gateway")
-            if (!result.count > 0) {
+            validateIpStructure(result, input.gateway, "gateway")
+            if (result.count === 0) {
                 checkGatewayIsinNetmask(result, input.gateway, `${input.address}/${input.prefix_length}`, "gateway")
             }
             checkNameServersLength(result, input.name_servers.length, "nameservers_length")
             if (input.name_servers.length > 0) {
-                checkIpStructure(result, input.name_servers[0], "dnsprimary")
+                validateIpStructure(result, input.name_servers[0], "dnsprimary")
             }
             if (input.name_servers.length > 1) {
-                checkIpStructure(result, input.name_servers[1], "dnssecondary")
+                validateIpStructure(result, input.name_servers[1], "dnssecondary")
             }
             break
         default:
@@ -72,6 +69,7 @@ const validateNetConfig = function (input) {
 }
 
 const exports = {
+    validateIpStructure,
     validateNetConfig,
 }
 
