@@ -17,7 +17,7 @@ test('net config is valid static', () => {
     let input = {
         method: "static",
         address: "10.77.0.10",
-        prefix_length: 8,
+        prefix_length: 24,
         gateway: "10.77.0.1",
         name_servers: ["4.4.4.4", "8.8.8.8"]
     }
@@ -29,7 +29,7 @@ test('net config static address required', () => {
     let input = {
         method: "static",
         address: "",
-        prefix_length: 8,
+        prefix_length: 24,
         gateway: "10.77.0.1",
         name_servers: ["4.4.4.4", "8.8.8.8"]
     }
@@ -43,7 +43,7 @@ test('net config static invalid ip address', () => {
     let input = {
         method: "static",
         address: "10.0.77.",
-        prefix_length: 8,
+        prefix_length: 24,
         gateway: "10.77.0.1",
         name_servers: []
     }
@@ -83,7 +83,7 @@ test('net config gateway required', () => {
     let input = {
         method: "static",
         address: "10.77.0.10",
-        prefix_length: 8,
+        prefix_length: 24,
         gateway: "",
         name_servers: []
     }
@@ -96,7 +96,7 @@ test('net config static invalid gateway', () => {
     let input = {
         method: "static",
         address: "10.0.77.10",
-        prefix_length: 8,
+        prefix_length: 24,
         gateway: "107.0.1",
         name_servers: []
     }
@@ -108,9 +108,9 @@ test('net config static invalid gateway', () => {
 test('net config static invalid primary server name', () => {
     let input = {
         method: "static",
-        address: "10.0.77.10",
-        prefix_length: 8,
-        gateway: "10.7.0.1",
+        address: "10.77.0.10",
+        prefix_length: 24,
+        gateway: "10.77.0.1",
         name_servers: ["10.77.0"]
     }
     let result = Validation.validateNetConfig(input)
@@ -121,8 +121,8 @@ test('net config static invalid primary server name', () => {
 test('net config static invalid secondary server name', () => {
     let input = {
         method: "static",
-        address: "10.0.77.10",
-        prefix_length: 8,
+        address: "10.77.0.10",
+        prefix_length: 24,
         gateway: "10.77.0.1",
         name_servers: ["10.77.0.1", "10.5."]
     }
@@ -134,9 +134,9 @@ test('net config static invalid secondary server name', () => {
 test('net config static dns primary empty, secondary correct', () => {
     let input = {
         method: "static",
-        address: "10.0.77.10",
-        prefix_length: 8,
-        gateway: "10.7.0.1",
+        address: "10.77.0.10",
+        prefix_length: 24,
+        gateway: "10.77.0.1",
         name_servers: ["", "10.5.67.2"]
     }
     let result = Validation.validateNetConfig(input)
@@ -147,9 +147,9 @@ test('net config static dns primary empty, secondary correct', () => {
 test('net config static only dns primary valid', () => {
     let input = {
         method: "static",
-        address: "10.0.77.10",
-        prefix_length: 8,
-        gateway: "10.0.1.1",
+        address: "10.77.0.10",
+        prefix_length: 24,
+        gateway: "10.77.0.1",
         name_servers: ["4.4.4.4"]
     }
     let result = Validation.validateNetConfig(input)
@@ -159,9 +159,84 @@ test('net config static only dns primary valid', () => {
 test('net config static dns primary and secondary valids', () => {
     let input = {
         method: "static",
-        address: "10.0.77.10",
+        address: "10.77.0.10",
+        prefix_length: 24,
+        gateway: "10.77.0.1",
+        name_servers: ["4.4.4.4", "8.8.8.8"]
+    }
+    let result = Validation.validateNetConfig(input)
+    expect(result.count).toBe(0)
+})
+
+test('net config static invalid gateway ip/24', () => {
+    let input = {
+        method: "static",
+        address: "10.77.0.10",
+        prefix_length: 24,
+        gateway: "10.77.1.1",
+        name_servers: ["4.4.4.4", "8.8.8.8"]
+    }
+    let result = Validation.validateNetConfig(input)
+    expect(result.count).toBe(1)
+    expect(result.errors.gateway).toBe("Invalid gateway segment")
+})
+
+test('net config static invalid gateway ip/16', () => {
+    let input = {
+        method: "static",
+        address: "10.77.0.10",
+        prefix_length: 16,
+        gateway: "10.87.0.10",
+        name_servers: ["4.4.4.4", "8.8.8.8"]
+    }
+    let result = Validation.validateNetConfig(input)
+    expect(result.count).toBe(1)
+    expect(result.errors.gateway).toBe("Invalid gateway segment")
+})
+
+test('net config static invalid gateway ip/8', () => {
+    let input = {
+        method: "static",
+        address: "10.77.0.10",
         prefix_length: 8,
-        gateway: "10.0.1.1",
+        gateway: "11.77.0.10",
+        name_servers: ["4.4.4.4", "8.8.8.8"]
+    }
+    let result = Validation.validateNetConfig(input)
+    expect(result.count).toBe(1)
+    expect(result.errors.gateway).toBe("Invalid gateway segment")
+})
+
+test('net config static valid gateway ip/24', () => {
+    let input = {
+        method: "static",
+        address: "10.77.0.10",
+        prefix_length: 24,
+        gateway: "10.77.0.1",
+        name_servers: ["4.4.4.4", "8.8.8.8"]
+    }
+    let result = Validation.validateNetConfig(input)
+    expect(result.count).toBe(0)
+})
+
+test('net config static valid gateway ip/16', () => {
+    let input = {
+        method: "static",
+        address: "10.77.0.10",
+        prefix_length: 16,
+        gateway: "10.77.0.1",
+        name_servers: ["4.4.4.4", "8.8.8.8"]
+    }
+    let result = Validation.validateNetConfig(input)
+    expect(result.count).toBe(0)
+})
+
+test('net config static valid gateway ip/8', () => {
+    let input = {
+        method: "static",
+        address: "10.77.0.10",
+        prefix_length: 8,
+        gateway: "10.77.0.1",
         name_servers: ["4.4.4.4", "8.8.8.8"]
     }
     let result = Validation.validateNetConfig(input)
