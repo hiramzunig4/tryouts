@@ -335,7 +335,7 @@ function Network() {
         </Form.Label>
         <Col sm={8}>
           <Form.Control
-            placeholder="IP address"
+            placeholder="IP Address"
             onChange={e => setField('address', e.target.value)}
             isInvalid={!!errors.address}
             disabled={ipAddressDisabled}
