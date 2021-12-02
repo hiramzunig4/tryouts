@@ -244,13 +244,26 @@ function Network() {
         console.log(JSON.stringify(config))
         let result = Validation.validateNetConfig(config)
         if (result.count > 0) {
-          console.log(JSON.stringify(result))
-          console.log(Object.keys(result.errors)[0])
-          console.log(Object.values(result.errors)[0])
-          if (Object.keys(result.errors)[0] === "dnsprimary") {
-            setErrors({ address: "", gateway: "", netmask: "", dnsprimary: Object.values(result.errors)[0], dnssecondary: "" })
+          let error = `${Object.keys(result.errors)[0]}`
+          switch (error) {
+            case "adddress":
+              setErrors({ address: Object.values(result.errors)[0] })
+              break
+            case "gateway":
+              setErrors({ gateway: Object.values(result.errors)[0] })
+              break
+            case "netmask":
+              setErrors({ netmask: Object.values(result.errors)[0] })
+              break
+            case "dnsprimary":
+              setErrors({ dnsprimary: Object.values(result.errors)[0] })
+              break
+            case "dnssecondary":
+              setErrors({ dnssecondary: Object.values(result.errors)[0] })
+              break
+            default:
+              break
           }
-        }
         else {
           api.setNetworkConfigStatic(result.input, function (res) {
             if (res.result === "ok") {
