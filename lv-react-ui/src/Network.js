@@ -125,15 +125,21 @@ function Network() {
           form.address = parseIP(res.message.config.ipv4.address)
           form.gateway = parseIP(res.message.config.ipv4.gateway)
           form.netmask = addressIp
-          if (res.message.config.ipv4.name_servers.length > 0) {
-            form.dnsprimary = parseIP(res.message.config.ipv4.name_servers[0])
+          if (res.message.config.ipv4.name_servers.length === 0) {
+            form.dnsprimary = ""
+            form.dnssecondary = ""
           }
-
-          if (res.message.config.ipv4.name_servers.length > 1) {
+          if (res.message.config.ipv4.name_servers.length === 1) {
+            form.dnsprimary = parseIP(res.message.config.ipv4.name_servers[0])
+            form.dnssecondary = ""
+          }
+          if (res.message.config.ipv4.name_servers.length === 2) {
+            form.dnsprimary = parseIP(res.message.config.ipv4.name_servers[0])
             form.dnssecondary = parseIP(res.message.config.ipv4.name_servers[1])
           }
         }
         setResponseString(`Get Config Success`)
+        setErrors({ address: "", gateway: "", netmask: "", dnsprimary: "", dnssecondary: "" })
         setIsValid(true)
         setTimeout(() => {
           setIsValid(false)
@@ -141,6 +147,7 @@ function Network() {
       }
       else { //is error in the response
         setResponseString(`Get Config Error`)
+        setErrors({ address: "", gateway: "", netmask: "", dnsprimary: "", dnssecondary: "" })
         setIsError(true)
         setTimeout(() => {
           setIsError(false)
@@ -206,6 +213,17 @@ function Network() {
             "prefix_length": cidr,
             "gateway": `${form.gateway}`,
             "name_servers": [`${dnsserver[0]}`]
+          }
+        }
+        if (!form.dnsprimary && form.dnssecondary) {
+          dnsserver.push("")
+          dnsserver.push(`${form.dnssecondary}`)
+          config = {
+            "method": "static",
+            "address": `${form.address}`,
+            "prefix_length": cidr,
+            "gateway": `${form.gateway}`,
+            "name_servers": [`${dnsserver[0]}`, `${dnsserver[1]}`]
           }
         }
         if (form.dnsprimary && form.dnssecondary) {
@@ -287,14 +305,15 @@ function Network() {
     const { address, gateway, netmask, dnsprimary, dnssecondary } = form
     const newErrors = {}
     // name errors
-    if (!address || address === '' || !validateIPaddress(address)) newErrors.address = 'Enter a correct address formart'
-    if (!gateway || gateway === '' || !validateIPaddress(gateway)) newErrors.gateway = 'Enter a correct gateway formart'
-    if (!netmask || netmask === '' || !validateIPaddress(netmask)) newErrors.netmask = 'Enter a correct netmask formart'
+    if (!address || !validateIPaddress(address)) newErrors.address = 'IP has invalid format'
+    if (address === '') newErrors.address = 'This field is required'
+    if (!gateway || gateway === '' || !validateIPaddress(gateway)) newErrors.gateway = 'IP has invalid format'
+    if (!netmask || netmask === '' || !validateIPaddress(netmask)) newErrors.netmask = 'IP has invalid format'
     if (dnsprimary) {
-      if (!dnsprimary || !validateIPaddress(dnsprimary)) newErrors.dnsprimary = 'Enter a correct dnsprimary formart'
+      if (!dnsprimary || !validateIPaddress(dnsprimary)) newErrors.dnsprimary = 'IP has invalid format'
     }
     if (dnssecondary) {
-      if (!dnssecondary || !validateIPaddress(dnssecondary)) newErrors.dnssecondary = 'Enter a correct dnssecondary formart'
+      if (!dnssecondary || !validateIPaddress(dnssecondary)) newErrors.dnssecondary = 'IP has invalid format'
     }
     return newErrors
   }
