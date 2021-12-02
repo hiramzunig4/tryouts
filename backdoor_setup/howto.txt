@@ -1,0 +1,11 @@
+go mod init github.com/hiramzunig4/tryouts/backdoor_setup
+go get github.com/gin-gonic/gin
+
+chrome http://127.0.0.1:5000
+curl http://127.0.0.1:5000/discovery
+
+- Embed and serve the react web app
+- UDP broadcast to discover appliances
+- installer windows
+- installer crossplatform
+

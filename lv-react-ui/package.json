@@ -14,7 +14,7 @@
     "react-scripts": "^3.4.4",
     "web-vitals": "^1.1.2"
   },
-  "proxy": "http://nerves.local:31680",
+  "proxy": "http://127.0.0.1:5000",
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
