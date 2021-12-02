@@ -264,6 +264,7 @@ function Network() {
             default:
               break
           }
+        }
         else {
           api.setNetworkConfigStatic(result.input, function (res) {
             if (res.result === "ok") {
