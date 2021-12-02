@@ -100,6 +100,10 @@ function Network() {
       if (res.result === "ok") {
         if (res.message.config.ipv4.method === "dhcp") {
           setRadioSelected("radiodhcp");
+          form.address = ""
+          form.gateway = ""
+          form.dnsprimary = ""
+          form.dnssecondary = ""
           setStateRadioDhcp(true)
           setStateRadioStatic(false)
           setDisabledComponents(true)
@@ -240,11 +244,12 @@ function Network() {
         console.log(JSON.stringify(config))
         let result = Validation.validateNetConfig(config)
         if (result.count > 0) {
-          setResponseString(Object.values(result.errors)[0])
-          setIsError(true)
-          setTimeout(() => {
-            setIsError(false)
-          }, 3000);
+          console.log(JSON.stringify(result))
+          console.log(Object.keys(result.errors)[0])
+          console.log(Object.values(result.errors)[0])
+          if (Object.keys(result.errors)[0] === "dnsprimary") {
+            setErrors({ address: "", gateway: "", netmask: "", dnsprimary: Object.values(result.errors)[0], dnssecondary: "" })
+          }
         }
         else {
           api.setNetworkConfigStatic(result.input, function (res) {
@@ -283,14 +288,14 @@ function Network() {
         api.setNetworkConfigDhcp(result.input, function (res) {
           console.log(res)
           if (res.result === "ok") {
-            setResponseString(`Set Static Config Succes`)
+            setResponseString(`Set DHCP Config Succes`)
             setIsValid(true)
             setTimeout(() => {
               setIsValid(false)
             }, 3000);
           }
           else {
-            setResponseString(`Set Static Config Error`)
+            setResponseString(`Set DHCP Config Error`)
             setIsError(true)
             setTimeout(() => {
               setIsError(false)
@@ -370,7 +375,7 @@ function Network() {
         </Form.Label>
         <Col xs={2} align="left">
           <Form.Control
-            className="form-control-custom" //makes gray the control
+            //</Col>className="form-control-custom" //makes gray the control
             as="select"
             bsPrefix={"form-select"} //shows the control like a combobox
             onChange={e => setField('netmask', e.target.value)}
@@ -443,8 +448,8 @@ function Network() {
       <Form.Group>
         <Col sm={{ span: 10, offset: 2 }}>
           <Stack direction="horizontal" gap={3}>
-            <Button onClick={ButtonSetNetworkConfig_Click}>Set Config</Button>
             <Button onClick={ButtonGetNetworkConfig_Click}>Get Config</Button>
+            <Button onClick={ButtonSetNetworkConfig_Click}>Set Config</Button>
             <Button onClick={ButtonPing_Click}>Ping</Button>
           </Stack>
         </Col>
