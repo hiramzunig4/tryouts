@@ -87,6 +87,7 @@ type IdResponseData struct {
 	MacAddr  string `json:"macaddr"`
 	Name     string `json:"name"`
 	Version  string `json:"version"`
+	IpAddr   string `json:"ipaddr"`
 }
 
 func discover(tos int) ([]*IdResponseDso, error) {
@@ -114,7 +115,7 @@ func discover(tos int) ([]*IdResponseDso, error) {
 	tosd := time.Duration(tos)
 	socket.SetDeadline(time.Now().Add(tosd * time.Second))
 	for {
-		inn, _, err := socket.ReadFromUDP(inbuf)
+		inn, addr, err := socket.ReadFromUDP(inbuf)
 		nerr, ok := err.(net.Error)
 		if ok && nerr.Timeout() {
 			return list, nil
@@ -122,13 +123,14 @@ func discover(tos int) ([]*IdResponseDso, error) {
 		if err != nil {
 			return nil, err
 		}
-		log.Println("<", string(inbuf[:inn]))
+		log.Println("<", addr, string(inbuf[:inn]))
 		response := &IdResponseDso{}
 		err = json.Unmarshal(inbuf[:inn], response)
 		if err != nil {
 			log.Println(err)
 		} else {
 			log.Println(response)
+			response.Data.IpAddr = addr.IP.String()
 			list = append(list, response)
 		}
 	}
