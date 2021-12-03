@@ -8,49 +8,34 @@ import (
 	"net"
 	"net/http"
 	"path/filepath"
+	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
-
-type IdDso struct {
-	Name   string `json:"name"`
-	Action string `json:"action"`
-}
-
-func main1() {
-	ra, err := net.ResolveUDPAddr("udp4", "255.255.255.255:31680")
-	if err != nil {
-		log.Fatal(err)
-	}
-	conn, err := net.DialUDP("udp4", nil, ra)
-	if err != nil {
-		log.Fatal(err)
-	}
-	id := &IdDso{Name: "nerves", Action: "id"}
-	idb, err := json.Marshal(id)
-	if err != nil {
-		log.Fatal(err)
-	}
-	log.Println(">", string(idb))
-	idn, err := conn.Write(idb)
-	if err != nil || idn != len(idb) {
-		log.Fatal(err)
-	}
-	input := make([]byte, 2048)
-	inn, err := conn.Read(input)
-	if err != nil {
-		log.Fatal(err)
-	}
-	log.Println("<", string(input[:inn]))
-}
 
 func main() {
 	gin.SetMode(gin.ReleaseMode) //remove debug warning
 	router := gin.New()          //remove default logger
 	router.Use(gin.Recovery())   //catches panics
 	router.Use(static)
-	router.GET("/discovery", func(c *gin.Context) {
-		c.JSON(http.StatusOK, "OK")
+	router.GET("/discovery/:tos", func(c *gin.Context) {
+		toss := c.Param("tos")
+		tos, err := strconv.ParseInt(toss, 10, 32)
+		if err != nil {
+			c.String(http.StatusBadRequest, err.Error())
+			return
+		}
+		if tos <= 0 || tos >= 5 {
+			c.String(http.StatusBadRequest, "invalid tos (0, 5)")
+			return
+		}
+		list, err := discover(int(tos))
+		if err != nil {
+			c.String(http.StatusBadRequest, err.Error())
+			return
+		}
+		c.JSON(http.StatusOK, list)
 	})
 	//FIXME
 	listen, err := net.Listen("tcp", ":5000")
@@ -82,5 +67,69 @@ func static(c *gin.Context) {
 		ext := filepath.Ext(path)
 		ct := mime.TypeByExtension(ext)
 		c.Data(http.StatusOK, ct, data)
+	}
+}
+
+type IdRequestDso struct {
+	Name   string `json:"name"`
+	Action string `json:"action"`
+}
+
+type IdResponseDso struct {
+	Name   string         `json:"name"`
+	Action string         `json:"action"`
+	Data   IdResponseData `json:"data"`
+}
+
+type IdResponseData struct {
+	Hostname string `json:"hostname"`
+	Ifname   string `json:"ifname"`
+	MacAddr  string `json:"macaddr"`
+	Name     string `json:"name"`
+	Version  string `json:"version"`
+}
+
+func discover(tos int) ([]*IdResponseDso, error) {
+	socket, err := net.ListenUDP("udp4", &net.UDPAddr{})
+	if err != nil {
+		return nil, err
+	}
+	defer socket.Close()
+	log.Println("LocalAddr", socket.LocalAddr())
+	idb, err := json.Marshal(&IdRequestDso{
+		Name: "nerves", Action: "id"})
+	if err != nil {
+		return nil, err
+	}
+	log.Println(">", string(idb))
+	idn, err := socket.WriteToUDP(idb, &net.UDPAddr{
+		IP:   net.IPv4(255, 255, 255, 255),
+		Port: 31680,
+	})
+	if err != nil || idn != len(idb) {
+		return nil, err
+	}
+	list := []*IdResponseDso{}
+	inbuf := make([]byte, 2048)
+	tosd := time.Duration(tos)
+	socket.SetDeadline(time.Now().Add(tosd * time.Second))
+	for {
+		inn, _, err := socket.ReadFromUDP(inbuf)
+		nerr, ok := err.(net.Error)
+		if ok && nerr.Timeout() {
+			return list, nil
+		}
+		if err != nil {
+			return nil, err
+		}
+		log.Println("<", string(inbuf[:inn]))
+		response := &IdResponseDso{}
+		err = json.Unmarshal(inbuf[:inn], response)
+		if err != nil {
+			log.Println(err)
+		} else {
+			log.Println(response)
+			list = append(list, response)
+		}
 	}
 }
