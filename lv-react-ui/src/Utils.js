@@ -18,9 +18,12 @@ function Utils() {
     })
   }
 
-  const rows = devices.map(d => <tr key="d.data.macaddr">
-    <td>{d.data.macaddr}</td>
-  </tr>)
+  function rows() {
+    console.log(devices)
+    return devices.map(d => <tr key="d.data.macaddr">
+      <td>{d.data.macaddr}</td>
+    </tr>)
+  }
 
   return (
     <>
@@ -31,13 +34,13 @@ function Utils() {
         <thead>
           <tr>
             <th>#</th>
-            <th>First test Name</th>
+            <th>First Name</th>
             <th>Last Name</th>
             <th>Username</th>
           </tr>
         </thead>
         <tbody>
-          {rows}
+          {rows()}
         </tbody>
       </Table>
 
