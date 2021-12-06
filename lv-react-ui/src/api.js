@@ -42,12 +42,20 @@ function getNetworkDiscover(cb) {
     .catch(err => cb(err))
 }
 
+function blinkNetworkDevice(cb, ip) {
+  fetch(`blink/${ip}`)
+    .then(res => res.json())
+    .then(json => cb(json))
+    .catch(err => cb(err))
+}
+
 const exports = {
   setNetworkConfigDhcp,
   getNetworkConfig,
   getNetworkPing,
   setNetworkConfigStatic,
   getNetworkDiscover,
+  blinkNetworkDevice,
 }
 
 export default exports
