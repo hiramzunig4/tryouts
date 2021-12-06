@@ -20,8 +20,8 @@ function setNetworkConfigStatic(config, cb) {
     .catch(err => cb(err))
 }
 
-function getNetworkConfig(cb) {
-  fetch("/net/state/eth0")
+function getNetworkConfig(cb, ip) {
+  fetch(`http://${ip}:31680/net/state/eth0`)
     .then(res => res.json())
     .then(json => cb(json))
     .catch(err => cb(err))
