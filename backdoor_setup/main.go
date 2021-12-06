@@ -3,6 +3,7 @@ package main
 import (
 	"embed"
 	"encoding/json"
+	"fmt"
 	"log"
 	"mime"
 	"net"
@@ -36,6 +37,15 @@ func main() {
 			return
 		}
 		c.JSON(http.StatusOK, list)
+	})
+	router.GET("/blink/:ips", func(c *gin.Context) {
+		ips := c.Param("ips")
+		err := blink(ips)
+		if err != nil {
+			c.String(http.StatusBadRequest, err.Error())
+			return
+		}
+		c.JSON(http.StatusOK, "ok")
 	})
 	//FIXME
 	listen, err := net.Listen("tcp", ":5000")
@@ -134,4 +144,31 @@ func discover(tos int) ([]*IdResponseDso, error) {
 			list = append(list, response)
 		}
 	}
+}
+
+func blink(ips string) error {
+	ip := net.ParseIP(ips)
+	if ip == nil {
+		return fmt.Errorf("invalid ip")
+	}
+	socket, err := net.ListenUDP("udp4", &net.UDPAddr{})
+	if err != nil {
+		return err
+	}
+	defer socket.Close()
+	log.Println("LocalAddr", socket.LocalAddr())
+	idb, err := json.Marshal(&IdRequestDso{
+		Name: "nerves", Action: "blink"})
+	if err != nil {
+		return err
+	}
+	log.Println(">", string(idb))
+	idn, err := socket.WriteToUDP(idb, &net.UDPAddr{
+		IP:   ip,
+		Port: 31680,
+	})
+	if err != nil || idn != len(idb) {
+		return err
+	}
+	return nil
 }
