@@ -27,8 +27,8 @@ function getNetworkConfig(cb) {
     .catch(err => cb(err))
 }
 
-function getNetworkPing(cb) {
-  fetch("http://10.77.3.170:31680/ping")
+function getNetworkPing(cb, ip) {
+  fetch(`http://${ip}:31680/ping`)
     .then(res => res.json())
     .then(json => cb(json))
     .catch(err => cb(err))

@@ -9,7 +9,6 @@ import React from "react"
 function Utils() {
 
   const [devices, setDevices] = useState([])
-  const [isDataDevice, setIsDataDevice] = React.useState(false)
 
   function buttonDiscoveryClick() {
     api.getNetworkDiscover(function (res) {
@@ -18,8 +17,22 @@ function Utils() {
     })
   }
 
-  const rows = devices.map(d => <tr key="d.data.macaddr">
-    <td>{d.data.macaddr}</td>
+  function buttonPingFromDiscover(device) {
+    console.log(`Ping to device ip ${device.data.ipaddr}`)
+    api.getNetworkPing(function (res) {
+      console.log(JSON.stringify(res))
+    }, device.data.ipaddr)
+  }
+
+  const rows = devices.map(drevice => <tr key="d.data.macaddr">
+    <td>{drevice.data.hostname}</td>
+    <td>{drevice.data.ifname}</td>
+    <td>{drevice.data.macaddr}</td>
+    <td>{drevice.data.name}</td>
+    <td>{drevice.data.version}</td>
+    <td>{drevice.data.ipaddr}</td>
+    <td> <Button onClick={() => buttonPingFromDiscover(drevice)}
+      variant="info" size="sm">Ping</Button></td>
   </tr>)
 
   return (
@@ -30,20 +43,21 @@ function Utils() {
       <Table striped bordered hover variant="dark">
         <thead>
           <tr>
-            <th>#</th>
-            <th>First Name</th>
-            <th>Last Name</th>
-            <th>Username</th>
+            <th>Hostname</th>
+            <th>Ifname</th>
+            <th>MAC Address</th>
+            <th>Name</th>
+            <th>Version</th>
+            <th>IP Address</th>
+            <th>Ping</th>
           </tr>
         </thead>
         <tbody>
           {rows}
         </tbody>
       </Table>
-
     </>
   )
-
 }
 
 export default Utils;
