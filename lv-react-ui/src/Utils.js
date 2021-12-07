@@ -1,30 +1,34 @@
 import React, { useState } from 'react'
 
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faLightbulb } from '@fortawesome/free-solid-svg-icons'
-import { faLaptopCode } from '@fortawesome/free-solid-svg-icons'
-import { faDatabase } from '@fortawesome/free-solid-svg-icons'
-import { faCog } from '@fortawesome/free-solid-svg-icons'
-
 import './App.css';
 import api from "./api"
+import ModalNetwork from './ModalNetwork';
 
-import Container from 'react-bootstrap/Container'
+import { faCog } from '@fortawesome/free-solid-svg-icons'
+import { faDatabase } from '@fortawesome/free-solid-svg-icons'
+import { faLightbulb } from '@fortawesome/free-solid-svg-icons'
+import { faLaptopCode } from '@fortawesome/free-solid-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+
+import Table from 'react-bootstrap/Table'
+import Toast from 'react-bootstrap/Toast'
 import Button from 'react-bootstrap/Button'
 import Navbar from 'react-bootstrap/Navbar'
-import Table from 'react-bootstrap/Table'
 import Spinner from 'react-bootstrap/Spinner'
-import Modal from 'react-bootstrap/Modal'
-import Toast from 'react-bootstrap/Toast'
+import Container from 'react-bootstrap/Container'
 import ToastContainer from 'react-bootstrap/ToastContainer'
 
 function Utils() {
 
   const [devices, setDevices] = useState([])
-  const [modalShow, setModalShow] = React.useState(false);
+  const [showModal, setShowModal] = React.useState(false);
   const [showSpinner, setShowSpinner] = React.useState("visually-hidden")
 
-  const [show, setShow] = useState(false);
+  const [messageToToast, setMessageToToast] = React.useState("")
+  const [toastColor, setToastColor] = React.useState("dark")
+  const [showToast, setShowToast] = useState(false);
+
+  const [selectDevice, setSelectDevice] = React.useState("")
 
   function buttonDiscoveryClick() {
     setShowSpinner("")
@@ -38,72 +42,64 @@ function Utils() {
   function buttonBlinkClick(device) {
     api.blinkNetworkDevice(function (res) {
       console.log(JSON.stringify(res))
+      setTypeOfToast('primary', `Blink action sent to ${device.data.ipaddr}`)
     }, device.data.ipaddr)
   }
 
 
   function buttonPingFromDiscover(device) {
-    setShow(true)
-    console.log(`Ping to device ip ${device.data.ipaddr}`)
     api.getNetworkPing(function (res) {
-      console.log(JSON.stringify(res))
+      console.log(res)
+      if (res.result === "ok") {
+        setTypeOfToast('success', `Ping to ${device.data.ipaddr} success`)
+      }
+      else {
+        setTypeOfToast('danger', `Ping to ${device.data.ipaddr} failed`)
+      }
     }, device.data.ipaddr)
   }
 
-  const rows = devices.map(drevice => <tr key="{device.data.macaddr}">
-    <td>{drevice.data.hostname}</td>
-    <td>{drevice.data.macaddr}</td>
-    <td>{drevice.data.version}</td>
-    <td>{drevice.data.ipaddr}</td>
-    <td> <Button onClick={() => buttonPingFromDiscover(drevice)} variant="dark" size="sm"> <FontAwesomeIcon icon={faLaptopCode} /></Button></td>
-    <td> <Button onClick={() => buttonBlinkClick(drevice)} variant="dark" size="sm"> <FontAwesomeIcon icon={faLightbulb} /></Button></td>
-    <td> <Button onClick={() => setModalShow(true)} variant="dark" size="sm"> <FontAwesomeIcon icon={faCog} /></Button></td>
-    <td> <Button onClick={() => buttonPingFromDiscover(drevice)} variant="dark" size="sm"> <FontAwesomeIcon icon={faDatabase} /></Button></td>
+  function buttonNetworkClick(device) {
+    setSelectDevice(device.data.ipaddr)
+    setShowModal(true);
+  }
+
+  const rows = devices.map(device => <tr key="{device.data.macaddr}">
+    <td>{device.data.hostname}</td>
+    <td>{device.data.macaddr}</td>
+    <td>{device.data.version}</td>
+    <td>{device.data.ipaddr}</td>
+    <td> <Button onClick={() => buttonPingFromDiscover(device)} variant="dark" size="sm"> <FontAwesomeIcon icon={faLaptopCode} /></Button></td>
+    <td> <Button onClick={() => buttonBlinkClick(device)} variant="dark" size="sm"> <FontAwesomeIcon icon={faLightbulb} /></Button></td>
+    <td> <Button onClick={() => buttonNetworkClick(device)} variant="dark" size="sm"> <FontAwesomeIcon icon={faCog} /></Button></td>
+    <td> <Button onClick={() => buttonPingFromDiscover(device)} variant="dark" size="sm"> <FontAwesomeIcon icon={faDatabase} /></Button></td>
   </tr>)
 
-  const toastPing = () => {
+  function setTypeOfToast(color, message) {
+    setToastColor(color)
+    setMessageToToast(message)
+    setShowToast(true)
+  }
+
+  const toastMessages = (message, color) => {
     return (
       <>
         <ToastContainer position='bottom-start' className="p-3">
-          <Toast animation={true} bg={'dark'} onClose={() => setShow(false)} show={show} delay={3000} autohide>
+          <Toast animation={true} bg={color} onClose={() => setShowToast(false)} show={showToast} delay={3000} autohide>
             <Toast.Header>
-              <strong className="me-auto">Ping</strong>
+              <strong className="me-auto">Message</strong>
               <small>Just now</small>
             </Toast.Header>
-            <Toast.Body className='text-white'>Sale cuando clickeo en Ping</Toast.Body>
+            <Toast.Body className='text-white'>{message}</Toast.Body>
           </Toast>
         </ToastContainer>
       </>
     )
   }
 
-  function MyVerticallyCenteredModal(props) {
-    return (
-      <Modal
-        {...props}
-        size="lg"
-        backdrop="static"
-        aria-labelledby="contained-modal-title-vcenter"
-        centered
-      >
-        <Modal.Header closeButton>
-          <Modal.Title id="contained-modal-title-vcenter">
-            Network Config
-          </Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-
-        </Modal.Body>
-        <Modal.Footer>
-          <Button onClick={props.onHide}>Close</Button>
-        </Modal.Footer>
-      </Modal>
-    );
-  }
-
   return (
     <Container>
-      {toastPing()}
+      {toastMessages(messageToToast, toastColor)}
       <Navbar >
         <Navbar.Brand>Laurel View Configuration</Navbar.Brand>
         <Navbar.Collapse className="justify-content-end">
@@ -128,12 +124,12 @@ function Utils() {
         </tbody>
       </Table>
       <Spinner className={showSpinner} animation="border" role="status" variant="dark" > </Spinner>
-      <MyVerticallyCenteredModal
-        show={modalShow}
-        onHide={() => setModalShow(false)}
+      <ModalNetwork
+        show={showModal}
+        onHide={() => setShowModal(false)}
+        device={selectDevice}
       />
     </Container>
   )
 }
-
 export default Utils;
