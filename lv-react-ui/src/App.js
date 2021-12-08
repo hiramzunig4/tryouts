@@ -56,7 +56,7 @@ function App() {
       else {
         setTypeOfToast('danger', `Ping to ${device.data.ipaddr} failed`)
       }
-    }, device.data.ipaddr)
+    }, device.data.ipaddr, device.data.macaddr)
   }
 
   function buttonNetworkClick(device) {
@@ -106,7 +106,7 @@ function App() {
           <Button onClick={buttonDiscoveryClick} variant="dark" title="Discover Devices">Discovery</Button>
         </Navbar.Collapse>
       </Navbar>
-      <Table striped bordered hover>
+      <Table style={{ textAlign: "center" }} striped bordered hover>
         <thead>
           <tr>
             <th>Hostname</th>

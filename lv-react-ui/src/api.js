@@ -27,8 +27,11 @@ function getNetworkConfig(cb, ip) {
     .catch(err => cb(err))
 }
 
-function getNetworkPing(cb, ip) {
-  fetch(`http://${ip}:31680/ping`)
+function getNetworkPing(cb, ip, pass) {
+  const username = "nerves"
+  fetch(`http://${ip}:31680/ping`, {
+    headers: { 'Authorization': 'Basic ' + Buffer.from(`${username}:${pass}`).toString('base64') }
+  })
     .then(res => res.json())
     .then(json => cb(json))
     .catch(err => cb(err))
