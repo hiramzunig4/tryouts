@@ -9,7 +9,7 @@ function setNetworkConfigDhcp(config, cb, ip) {
     .catch(err => cb(err))
 }
 
-function setNetworkConfigStatic(ip, config, cb) {
+function setNetworkConfigStatic(config, cb, ip) {
   fetch(`http://${ip}:31680/net/setup/eth0`, {
     method: "post",
     body: JSON.stringify(config),
@@ -34,16 +34,15 @@ function getNetworkPing(cb, ip) {
     .catch(err => cb(err))
 }
 
-
-function getNetworkDiscover(cb) {
-  fetch("discovery/2")
+function blinkNetworkDevice(cb, ip) {
+  fetch(`blink/${ip}`)
     .then(res => res.json())
     .then(json => cb(json))
     .catch(err => cb(err))
 }
 
-function blinkNetworkDevice(cb, ip) {
-  fetch(`blink/${ip}`)
+function getNetworkDiscover(cb) {
+  fetch("discovery/2")
     .then(res => res.json())
     .then(json => cb(json))
     .catch(err => cb(err))

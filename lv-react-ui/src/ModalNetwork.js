@@ -63,6 +63,13 @@ function ModalNetwork(props) {
         return addresswithpoints.replace(/[[\]']/g, "")
     }
 
+    function validateIPaddress(ipaddress) {
+        if (/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(ipaddress)) {
+            return (true)
+        }
+        return (false)
+    }
+
     const setField = (field, value) => {
         setForm({
             ...form,
@@ -73,6 +80,23 @@ function ModalNetwork(props) {
             ...errors,
             [field]: null
         })
+    }
+
+    const findFormErrors = () => {
+        const { address, gateway, netmask, dnsprimary, dnssecondary } = form
+        const newErrors = {}
+        // name errors
+        if (!address || !validateIPaddress(address)) newErrors.address = 'IP has invalid format'
+        if (address === '') newErrors.address = 'This field is required'
+        if (!gateway || gateway === '' || !validateIPaddress(gateway)) newErrors.gateway = 'IP has invalid format'
+        if (!netmask || netmask === '' || !validateIPaddress(netmask)) newErrors.netmask = 'IP has invalid format'
+        if (dnsprimary) {
+            if (!dnsprimary || !validateIPaddress(dnsprimary)) newErrors.dnsprimary = 'IP has invalid format'
+        }
+        if (dnssecondary) {
+            if (!dnssecondary || !validateIPaddress(dnssecondary)) newErrors.dnssecondary = 'IP has invalid format'
+        }
+        return newErrors
     }
 
     function ButtonGetNetworkConfig_Click() {
@@ -148,103 +172,116 @@ function ModalNetwork(props) {
         //the config is static
         console.log(`Esto es lo realmente seleccionado esta bieb? ${radioSelected}`)
         if (radioSelected === "radiostatic") {
-            console.log(`
+            // get our new errors
+            const newErrors = findFormErrors()
+            // Conditional logic:
+            if (Object.keys(newErrors).length > 0) {
+                // We got errors!
+                setErrors(newErrors)
+            }
+            else {
+
+                console.log(`
               address: ${form.address}
               gateway: ${form.gateway}
               netmask: ${form.netmask}
               server primary: ${form.dnsprimary}
               server secondary: ${form.dnssecondary}
             `)
-            var maskNodes = form.netmask.match(/(\d+)/g);
-            var cidr = 0;
-            for (var i in maskNodes) {
-                cidr += (((maskNodes[i] >>> 0).toString(2)).match(/1/g) || []).length;
-            }
+                var maskNodes = form.netmask.match(/(\d+)/g);
+                var cidr = 0;
+                for (var i in maskNodes) {
+                    cidr += (((maskNodes[i] >>> 0).toString(2)).match(/1/g) || []).length;
+                }
 
-            var config = ""
-            var dnsserver = []
-            if (!form.dnsprimary && !form.dnssecondary) {
-                config = {
-                    "method": "static",
-                    "address": `${form.address}`,
-                    "prefix_length": cidr,
-                    "gateway": `${form.gateway}`,
-                    "name_servers": []
-                }
-            }
-            if (form.dnsprimary && !form.dnssecondary) {
-                dnsserver.push(`${form.dnsprimary}`)
-                config = {
-                    "method": "static",
-                    "address": `${form.address}`,
-                    "prefix_length": cidr,
-                    "gateway": `${form.gateway}`,
-                    "name_servers": [`${dnsserver[0]}`]
-                }
-            }
-            if (!form.dnsprimary && form.dnssecondary) {
-                dnsserver.push("")
-                dnsserver.push(`${form.dnssecondary}`)
-                config = {
-                    "method": "static",
-                    "address": `${form.address}`,
-                    "prefix_length": cidr,
-                    "gateway": `${form.gateway}`,
-                    "name_servers": [`${dnsserver[0]}`, `${dnsserver[1]}`]
-                }
-            }
-            if (form.dnsprimary && form.dnssecondary) {
-                dnsserver.push(`${form.dnsprimary}`)
-                dnsserver.push(`${form.dnssecondary}`)
-                config = {
-                    "method": "static",
-                    "address": `${form.address}`,
-                    "prefix_length": cidr,
-                    "gateway": `${form.gateway}`,
-                    "name_servers": [`${dnsserver[0]}`, `${dnsserver[1]}`]
-                }
-            }
-            console.log(JSON.stringify(config))
-            let result = Validation.validateNetConfig(config)
-            if (result.count > 0) {
-                let error = `${Object.keys(result.errors)[0]}`
-                switch (error) {
-                    case "adddress":
-                        setErrors({ address: Object.values(result.errors)[0] })
-                        break
-                    case "gateway":
-                        setErrors({ gateway: Object.values(result.errors)[0] })
-                        break
-                    case "netmask":
-                        setErrors({ netmask: Object.values(result.errors)[0] })
-                        break
-                    case "dnsprimary":
-                        setErrors({ dnsprimary: Object.values(result.errors)[0] })
-                        break
-                    case "dnssecondary":
-                        setErrors({ dnssecondary: Object.values(result.errors)[0] })
-                        break
-                    default:
-                        break
-                }
-            }
-            else {
-                api.setNetworkConfigStatic(result.input, function (res) {
-                    if (res.result === "ok") {
-                        setResponseString(`Set Static Config Succes`)
-                        setIsValid(true)
-                        setTimeout(() => {
-                            setIsValid(false)
-                        }, 3000);
+                var config = ""
+                var dnsserver = []
+                if (!form.dnsprimary && !form.dnssecondary) {
+                    config = {
+                        "method": "static",
+                        "address": `${form.address}`,
+                        "prefix_length": cidr,
+                        "gateway": `${form.gateway}`,
+                        "name_servers": []
                     }
-                    else {
-                        setResponseString(`Set Static Config Error`)
-                        setIsError(true)
-                        setTimeout(() => {
-                            setIsError(false)
-                        }, 3000);
+                }
+                if (form.dnsprimary && !form.dnssecondary) {
+                    dnsserver.push(`${form.dnsprimary}`)
+                    config = {
+                        "method": "static",
+                        "address": `${form.address}`,
+                        "prefix_length": cidr,
+                        "gateway": `${form.gateway}`,
+                        "name_servers": [`${dnsserver[0]}`]
                     }
-                }, props.device);
+                }
+                if (!form.dnsprimary && form.dnssecondary) {
+                    dnsserver.push("")
+                    dnsserver.push(`${form.dnssecondary}`)
+                    config = {
+                        "method": "static",
+                        "address": `${form.address}`,
+                        "prefix_length": cidr,
+                        "gateway": `${form.gateway}`,
+                        "name_servers": [`${dnsserver[0]}`, `${dnsserver[1]}`]
+                    }
+                }
+                if (form.dnsprimary && form.dnssecondary) {
+                    dnsserver.push(`${form.dnsprimary}`)
+                    dnsserver.push(`${form.dnssecondary}`)
+                    config = {
+                        "method": "static",
+                        "address": `${form.address}`,
+                        "prefix_length": cidr,
+                        "gateway": `${form.gateway}`,
+                        "name_servers": [`${dnsserver[0]}`, `${dnsserver[1]}`]
+                    }
+                }
+                console.log(JSON.stringify(config))
+                let result = Validation.validateNetConfig(config)
+                console.log(`Se imprime el result de la validacion que trae? ${JSON.stringify(result)}`)
+                if (result.count > 0) {
+                    let error = `${Object.keys(result.errors)[0]}`
+                    console.log(`Esto contiene error ${error}`)
+                    switch (error) {
+                        case "adddress":
+                            setErrors({ address: Object.values(result.errors)[0] })
+                            break
+                        case "gateway":
+                            setErrors({ gateway: Object.values(result.errors)[0] })
+                            break
+                        case "netmask":
+                            setErrors({ netmask: Object.values(result.errors)[0] })
+                            break
+                        case "dnsprimary":
+                            setErrors({ dnsprimary: Object.values(result.errors)[0] })
+                            break
+                        case "dnssecondary":
+                            setErrors({ dnssecondary: Object.values(result.errors)[0] })
+                            break
+                        default:
+                            break
+                    }
+                }
+                else {
+                    api.setNetworkConfigStatic(result.input, function (res) {
+                        console.log(res)
+                        if (res.result === "ok") {
+                            setResponseString(`Set Static Config Succes`)
+                            setIsValid(true)
+                            setTimeout(() => {
+                                setIsValid(false)
+                            }, 3000);
+                        }
+                        else {
+                            setResponseString(`Set Static Config Error`)
+                            setIsError(true)
+                            setTimeout(() => {
+                                setIsError(false)
+                            }, 3000);
+                        }
+                    }, props.device);
+                }
             }
         }
         else {
@@ -330,10 +367,13 @@ function ModalNetwork(props) {
                         <Col sm={8}>
                             <Form.Control
                                 placeholder="IP Address"
-                                value={form.address}
-                                disabled={ipAddressDisabled}
                                 onChange={e => setField('address', e.target.value)}
-                            /> </Col>
+                                isInvalid={!!errors.address}
+                                disabled={ipAddressDisabled}
+                                value={form.address}
+                            />
+                            <Form.Control.Feedback type='invalid'>{errors.address}</Form.Control.Feedback>
+                        </Col>
                     </Form.Group>
                     <Form.Label as="legend">
                     </Form.Label>
@@ -348,12 +388,14 @@ function ModalNetwork(props) {
                                 bsPrefix={"form-select"}
                                 value={form.netmask}
                                 disabled={netmaskDisabled}
+                                isInvalid={!!errors.netmask}
                                 onChange={e => setField('netmask', e.target.value)}
                             >
                                 <option value="255.255.255.0">255.255.255.0</option>
                                 <option value="255.255.0.0">255.255.0.0</option>
                                 <option value="255.0.0.0">255.0.0.0</option>
                             </Form.Control>
+                            <Form.Control.Feedback type='invalid'>{errors.netmask}</Form.Control.Feedback>
                         </Col>
                     </Form.Group>
 
@@ -366,8 +408,10 @@ function ModalNetwork(props) {
                                 placeholder="Gateway"
                                 value={form.gateway}
                                 disabled={gatewayDisabled}
+                                isInvalid={!!errors.gateway}
                                 onChange={e => setField('gateway', e.target.value)}
                             />
+                            <Form.Control.Feedback type='invalid'>{errors.gateway}</Form.Control.Feedback>
                         </Col>
                     </Form.Group>
 
@@ -386,8 +430,10 @@ function ModalNetwork(props) {
                                 placeholder="Primary DNS"
                                 value={form.dnsprimary}
                                 disabled={dnsPrimaryDisabled}
+                                isInvalid={!!errors.dnsprimary}
                                 onChange={e => setField('dnsprimary', e.target.value)}
                             />
+                            <Form.Control.Feedback type='invalid'>{errors.dnsprimary}</Form.Control.Feedback>
                         </Col>
                     </Form.Group>
 
@@ -400,8 +446,10 @@ function ModalNetwork(props) {
                                 placeholder="Secondary DNS"
                                 value={form.dnssecondary}
                                 disabled={dnsSecondaryDisabled}
+                                isInvalid={!!errors.dnssecondary}
                                 onChange={e => setField('dnssecondary', e.target.value)}
                             />
+                            <Form.Control.Feedback type='invalid'>{errors.dnssecondary}</Form.Control.Feedback>
                         </Col>
                     </Form.Group>
 
