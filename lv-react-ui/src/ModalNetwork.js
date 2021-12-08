@@ -163,7 +163,7 @@ function ModalNetwork(props) {
                     setIsError(false)
                 }, 3000);
             }
-        }, props.device)
+        }, props.device, "nerves", props.pass)
     }
 
     //SetConfig
@@ -280,7 +280,7 @@ function ModalNetwork(props) {
                                 setIsError(false)
                             }, 3000);
                         }
-                    }, props.device);
+                    }, props.device, "nerves", props.pass);
                 }
             }
         }
@@ -314,7 +314,7 @@ function ModalNetwork(props) {
                             setIsError(false)
                         }, 3000);
                     }
-                }, props.device);
+                }, props.device, "nerves", props.pass);
             }
         }
     }

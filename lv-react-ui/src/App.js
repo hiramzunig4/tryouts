@@ -29,6 +29,7 @@ function App() {
   const [showToast, setShowToast] = useState(false);
 
   const [selectDevice, setSelectDevice] = React.useState("")
+  const [devicePass, setDevicePass] = React.useState("")
 
   function buttonDiscoveryClick() {
     setShowSpinner("")
@@ -56,11 +57,12 @@ function App() {
       else {
         setTypeOfToast('danger', `Ping to ${device.data.ipaddr} failed`)
       }
-    }, device.data.ipaddr, device.data.macaddr)
+    }, device.data.ipaddr, "nerves", device.data.macaddr)
   }
 
   function buttonNetworkClick(device) {
     setSelectDevice(device.data.ipaddr)
+    setDevicePass(device.data.macaddr)
     setShowModal(true)
   }
 
@@ -132,6 +134,7 @@ function App() {
         show={showModal}
         onHide={() => setShowModal(false)}
         device={selectDevice}
+        pass={devicePass}
       />
     </Container>
   )

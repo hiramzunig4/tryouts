@@ -1,34 +1,42 @@
-function setNetworkConfigDhcp(config, cb, ip) {
+function setNetworkConfigDhcp(config, cb, ip, username, pass) {
   fetch(`http://${ip}:31680/net/setup/eth0`, {
     method: "post",
     body: JSON.stringify(config),
-    headers: { "Content-Type": "application/json" }
+    headers: {
+      "Content-Type": "application/json",
+      'Authorization': 'Basic ' + Buffer.from(`${username}:${pass}`).toString('base64')
+    }
   })
     .then(res => res.json())
     .then(json => cb(json))
     .catch(err => cb(err))
 }
 
-function setNetworkConfigStatic(config, cb, ip) {
+function setNetworkConfigStatic(config, cb, ip, username, pass) {
   fetch(`http://${ip}:31680/net/setup/eth0`, {
     method: "post",
     body: JSON.stringify(config),
-    headers: { "Content-Type": "application/json" }
+    headers: {
+      "Content-Type": "application/json",
+      'Authorization': 'Basic ' + Buffer.from(`${username}:${pass}`).toString('base64')
+    }
   })
     .then(res => res.json())
     .then(json => cb(json))
     .catch(err => cb(err))
 }
 
-function getNetworkConfig(cb, ip) {
-  fetch(`http://${ip}:31680/net/state/eth0`)
+function getNetworkConfig(cb, ip, username, pass) {
+  console.log(`Esto llega ${ip} ${username} ${pass}`)
+  fetch(`http://${ip}:31680/net/state/eth0`, {
+    headers: { 'Authorization': 'Basic ' + Buffer.from(`${username}:${pass}`).toString('base64') }
+  })
     .then(res => res.json())
     .then(json => cb(json))
     .catch(err => cb(err))
 }
 
-function getNetworkPing(cb, ip, pass) {
-  const username = "nerves"
+function getNetworkPing(cb, ip, username, pass) {
   fetch(`http://${ip}:31680/ping`, {
     headers: { 'Authorization': 'Basic ' + Buffer.from(`${username}:${pass}`).toString('base64') }
   })
