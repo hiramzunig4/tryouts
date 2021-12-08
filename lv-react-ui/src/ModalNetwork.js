@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 
 import api from './api'
+import Validation from './Validation'
 
 import Col from 'react-bootstrap/Col'
 import Row from 'react-bootstrap/Row'
@@ -11,7 +12,6 @@ import Stack from 'react-bootstrap/Stack'
 import Button from 'react-bootstrap/Button'
 
 function ModalNetwork(props) {
-
     //radio selector
     const [radioSelected, setRadioSelected] = React.useState("radiodhcp")
     const [stateRadioDhcp, setStateRadioDhcp] = React.useState(true)
@@ -46,7 +46,7 @@ function ModalNetwork(props) {
             setStateRadioStatic(true)
             setDisabledComponents(false)
         }
-        setRadioSelected(event.target.id)
+        setRadioSelected(`${event.target.id}`)
         console.log(radioSelected)
     }
 
@@ -63,9 +63,20 @@ function ModalNetwork(props) {
         return addresswithpoints.replace(/[[\]']/g, "")
     }
 
+    const setField = (field, value) => {
+        setForm({
+            ...form,
+            [field]: value
+        })
+        // Check and see if errors exist, and remove them from the error object:
+        if (!!errors[field]) setErrors({
+            ...errors,
+            [field]: null
+        })
+    }
+
     function ButtonGetNetworkConfig_Click() {
         console.log("clicked in get config");
-        console.log(`Ping to ${props.device}`)
         api.getNetworkConfig(function (res) {
             console.log(res)
             if (res.result === "ok") {
@@ -131,6 +142,146 @@ function ModalNetwork(props) {
         }, props.device)
     }
 
+    //SetConfig
+    const ButtonSetNetworkConfig_Click = (event) => {
+        event.preventDefault()
+        //the config is static
+        console.log(`Esto es lo realmente seleccionado esta bieb? ${radioSelected}`)
+        if (radioSelected === "radiostatic") {
+            console.log(`
+              address: ${form.address}
+              gateway: ${form.gateway}
+              netmask: ${form.netmask}
+              server primary: ${form.dnsprimary}
+              server secondary: ${form.dnssecondary}
+            `)
+            var maskNodes = form.netmask.match(/(\d+)/g);
+            var cidr = 0;
+            for (var i in maskNodes) {
+                cidr += (((maskNodes[i] >>> 0).toString(2)).match(/1/g) || []).length;
+            }
+
+            var config = ""
+            var dnsserver = []
+            if (!form.dnsprimary && !form.dnssecondary) {
+                config = {
+                    "method": "static",
+                    "address": `${form.address}`,
+                    "prefix_length": cidr,
+                    "gateway": `${form.gateway}`,
+                    "name_servers": []
+                }
+            }
+            if (form.dnsprimary && !form.dnssecondary) {
+                dnsserver.push(`${form.dnsprimary}`)
+                config = {
+                    "method": "static",
+                    "address": `${form.address}`,
+                    "prefix_length": cidr,
+                    "gateway": `${form.gateway}`,
+                    "name_servers": [`${dnsserver[0]}`]
+                }
+            }
+            if (!form.dnsprimary && form.dnssecondary) {
+                dnsserver.push("")
+                dnsserver.push(`${form.dnssecondary}`)
+                config = {
+                    "method": "static",
+                    "address": `${form.address}`,
+                    "prefix_length": cidr,
+                    "gateway": `${form.gateway}`,
+                    "name_servers": [`${dnsserver[0]}`, `${dnsserver[1]}`]
+                }
+            }
+            if (form.dnsprimary && form.dnssecondary) {
+                dnsserver.push(`${form.dnsprimary}`)
+                dnsserver.push(`${form.dnssecondary}`)
+                config = {
+                    "method": "static",
+                    "address": `${form.address}`,
+                    "prefix_length": cidr,
+                    "gateway": `${form.gateway}`,
+                    "name_servers": [`${dnsserver[0]}`, `${dnsserver[1]}`]
+                }
+            }
+            console.log(JSON.stringify(config))
+            let result = Validation.validateNetConfig(config)
+            if (result.count > 0) {
+                let error = `${Object.keys(result.errors)[0]}`
+                switch (error) {
+                    case "adddress":
+                        setErrors({ address: Object.values(result.errors)[0] })
+                        break
+                    case "gateway":
+                        setErrors({ gateway: Object.values(result.errors)[0] })
+                        break
+                    case "netmask":
+                        setErrors({ netmask: Object.values(result.errors)[0] })
+                        break
+                    case "dnsprimary":
+                        setErrors({ dnsprimary: Object.values(result.errors)[0] })
+                        break
+                    case "dnssecondary":
+                        setErrors({ dnssecondary: Object.values(result.errors)[0] })
+                        break
+                    default:
+                        break
+                }
+            }
+            else {
+                api.setNetworkConfigStatic(result.input, function (res) {
+                    if (res.result === "ok") {
+                        setResponseString(`Set Static Config Succes`)
+                        setIsValid(true)
+                        setTimeout(() => {
+                            setIsValid(false)
+                        }, 3000);
+                    }
+                    else {
+                        setResponseString(`Set Static Config Error`)
+                        setIsError(true)
+                        setTimeout(() => {
+                            setIsError(false)
+                        }, 3000);
+                    }
+                }, props.device);
+            }
+        }
+        else {
+            console.log(radioSelected)
+            const config = {
+                "method": "dhcp"
+            }
+            let result = Validation.validateNetConfig(config)
+            if (result.count > 0) {
+                setResponseString(`Error in config`)
+                setIsError(true)
+                setTimeout(() => {
+                    setIsError(false)
+                }, 3000);
+            }
+            else {
+                api.setNetworkConfigDhcp(result.input, function (res) {
+                    console.log(res)
+                    if (res.result === "ok") {
+                        setResponseString(`Set DHCP Config Succes`)
+                        setIsValid(true)
+                        setTimeout(() => {
+                            setIsValid(false)
+                        }, 3000);
+                    }
+                    else {
+                        setResponseString(`Set DHCP Config Error`)
+                        setIsError(true)
+                        setTimeout(() => {
+                            setIsError(false)
+                        }, 3000);
+                    }
+                }, props.device);
+            }
+        }
+    }
+
     return (
         <Modal
             {...props}
@@ -179,7 +330,9 @@ function ModalNetwork(props) {
                         <Col sm={8}>
                             <Form.Control
                                 placeholder="IP Address"
+                                value={form.address}
                                 disabled={ipAddressDisabled}
+                                onChange={e => setField('address', e.target.value)}
                             /> </Col>
                     </Form.Group>
                     <Form.Label as="legend">
@@ -193,7 +346,9 @@ function ModalNetwork(props) {
                                 //</Col>className="form-control-custom" //makes gray the control
                                 as="select"
                                 bsPrefix={"form-select"}
+                                value={form.netmask}
                                 disabled={netmaskDisabled}
+                                onChange={e => setField('netmask', e.target.value)}
                             >
                                 <option value="255.255.255.0">255.255.255.0</option>
                                 <option value="255.255.0.0">255.255.0.0</option>
@@ -209,7 +364,9 @@ function ModalNetwork(props) {
                         <Col sm={8}>
                             <Form.Control
                                 placeholder="Gateway"
+                                value={form.gateway}
                                 disabled={gatewayDisabled}
+                                onChange={e => setField('gateway', e.target.value)}
                             />
                         </Col>
                     </Form.Group>
@@ -227,7 +384,9 @@ function ModalNetwork(props) {
                         <Col sm={8}>
                             <Form.Control
                                 placeholder="Primary DNS"
+                                value={form.dnsprimary}
                                 disabled={dnsPrimaryDisabled}
+                                onChange={e => setField('dnsprimary', e.target.value)}
                             />
                         </Col>
                     </Form.Group>
@@ -239,7 +398,9 @@ function ModalNetwork(props) {
                         <Col sm={8}>
                             <Form.Control
                                 placeholder="Secondary DNS"
+                                value={form.dnssecondary}
                                 disabled={dnsSecondaryDisabled}
+                                onChange={e => setField('dnssecondary', e.target.value)}
                             />
                         </Col>
                     </Form.Group>
@@ -255,7 +416,7 @@ function ModalNetwork(props) {
             </Modal.Body>
             <Modal.Footer>
                 <Button onClick={ButtonGetNetworkConfig_Click}>Get Config</Button>
-                <Button>Set Config</Button>
+                <Button onClick={ButtonSetNetworkConfig_Click}>Set Config</Button>
                 <Button onClick={props.onHide}>Close</Button>
             </Modal.Footer>
         </Modal >

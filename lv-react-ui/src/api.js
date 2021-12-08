@@ -1,5 +1,5 @@
-function setNetworkConfigDhcp(config, cb) {
-  fetch("/net/setup/eth0", {
+function setNetworkConfigDhcp(config, cb, ip) {
+  fetch(`http://${ip}:31680/net/setup/eth0`, {
     method: "post",
     body: JSON.stringify(config),
     headers: { "Content-Type": "application/json" }
@@ -9,8 +9,8 @@ function setNetworkConfigDhcp(config, cb) {
     .catch(err => cb(err))
 }
 
-function setNetworkConfigStatic(config, cb) {
-  fetch("/net/setup/eth0", {
+function setNetworkConfigStatic(ip, config, cb) {
+  fetch(`http://${ip}:31680/net/setup/eth0`, {
     method: "post",
     body: JSON.stringify(config),
     headers: { "Content-Type": "application/json" }

@@ -61,7 +61,7 @@ function Utils() {
 
   function buttonNetworkClick(device) {
     setSelectDevice(device.data.ipaddr)
-    setShowModal(true);
+    setShowModal(true)
   }
 
   const rows = devices.map(device => <tr key="{device.data.macaddr}">
