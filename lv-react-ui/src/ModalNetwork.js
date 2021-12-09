@@ -265,13 +265,19 @@ function ModalNetwork(props) {
                 }
                 else {
                     api.setNetworkConfigStatic(result.input, function (res) {
-                        console.log(res)
+                        console.log(`Esta es la respuesta del set static ${JSON.stringify(res)}`)
                         if (res.result === "ok") {
                             setResponseString(`Set Static Config Succes`)
                             setIsValid(true)
                             setTimeout(() => {
                                 setIsValid(false)
+                                form.address = ""
+                                form.gateway = ""
+                                form.dnsprimary = ""
+                                form.dnssecondary = ""
+                                props.onHide()
                             }, 3000);
+
                         }
                         else {
                             setResponseString(`Set Static Config Error`)
