@@ -2,12 +2,14 @@ import React, { useState } from 'react'
 
 import './App.css';
 import api from "./api"
-import ModalNetwork from './ModalNetwork';
+import Network from './Network';
+import Database from './Database';
 
 import { faCog } from '@fortawesome/free-solid-svg-icons'
 import { faDatabase } from '@fortawesome/free-solid-svg-icons'
 import { faLightbulb } from '@fortawesome/free-solid-svg-icons'
 import { faLaptopCode } from '@fortawesome/free-solid-svg-icons'
+import { faUserCog } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
 import Table from 'react-bootstrap/Table'
@@ -21,7 +23,8 @@ import ToastContainer from 'react-bootstrap/ToastContainer'
 function App() {
 
   const [devices, setDevices] = useState([])
-  const [showModal, setShowModal] = React.useState(false);
+  const [showNetworkModal, setShowNetworkModal] = React.useState(false);
+  const [showDatabaseModal, setShowDatabaseModal] = React.useState(false);
   const [showSpinner, setShowSpinner] = React.useState("visually-hidden")
 
   const [messageToToast, setMessageToToast] = React.useState("")
@@ -43,7 +46,7 @@ function App() {
   function buttonBlinkClick(device) {
     api.blinkNetworkDevice(function (res) {
       console.log(JSON.stringify(res))
-      setTypeOfToast('primary', `Blink action sent to ${device.data.ipaddr}`)
+      setTypeOfToast('dark', `Blink action sent to ${device.data.ipaddr}`)
     }, device.data.ipaddr)
   }
 
@@ -52,7 +55,7 @@ function App() {
     api.getNetworkPing(function (res) {
       console.log(res)
       if (res.result === "ok") {
-        setTypeOfToast('success', `Ping to ${device.data.ipaddr} success`)
+        setTypeOfToast('dark', `Ping to ${device.data.ipaddr} success`)
       }
       else {
         setTypeOfToast('danger', `Ping to ${device.data.ipaddr} failed`)
@@ -63,7 +66,11 @@ function App() {
   function buttonNetworkClick(device) {
     setSelectDevice(device.data.ipaddr)
     setDevicePass(device.data.macaddr)
-    setShowModal(true)
+    setShowNetworkModal(true)
+  }
+
+  function buttonDatabaseClick(device) {
+    setShowDatabaseModal(true)
   }
 
   const rows = devices.map(device => <tr key="{device.data.macaddr}">
@@ -73,8 +80,9 @@ function App() {
     <td>{device.data.ipaddr}</td>
     <td> <Button onClick={() => buttonPingFromDiscover(device)} variant="dark" size="sm"> <FontAwesomeIcon icon={faLaptopCode} /></Button></td>
     <td> <Button onClick={() => buttonBlinkClick(device)} variant="dark" size="sm"> <FontAwesomeIcon icon={faLightbulb} /></Button></td>
+    <td> <Button onClick={() => buttonPingFromDiscover(device)} variant="dark" size="sm"> <FontAwesomeIcon icon={faUserCog} /></Button></td>
     <td> <Button onClick={() => buttonNetworkClick(device)} variant="dark" size="sm"> <FontAwesomeIcon icon={faCog} /></Button></td>
-    <td> <Button onClick={() => buttonPingFromDiscover(device)} variant="dark" size="sm"> <FontAwesomeIcon icon={faDatabase} /></Button></td>
+    <td> <Button onClick={() => buttonDatabaseClick(device)} variant="dark" size="sm"> <FontAwesomeIcon icon={faDatabase} /></Button></td>
   </tr>)
 
   function setTypeOfToast(color, message) {
@@ -103,7 +111,7 @@ function App() {
     <Container>
       {toastMessages(messageToToast, toastColor)}
       <Navbar >
-        <Navbar.Brand>Laurel View Configuration</Navbar.Brand>
+        <Navbar.Brand>Laurel View Setup</Navbar.Brand>
         <Navbar.Collapse className="justify-content-end">
           <Button onClick={buttonDiscoveryClick} variant="dark" title="Discover Devices">Discovery</Button>
         </Navbar.Collapse>
@@ -117,6 +125,7 @@ function App() {
             <th>IP Address</th>
             <th>Ping</th>
             <th>Blink</th>
+            <th>Security</th>
             <th>Network Config</th>
             <th>Database</th>
           </tr>
@@ -130,11 +139,20 @@ function App() {
           <Spinner className={showSpinner} animation="border" role="status" variant="dark"> </Spinner>
         </Navbar.Collapse>
       </Navbar>
-      <ModalNetwork
-        show={showModal}
-        onHide={() => setShowModal(false)}
+      <Network
+        show={showNetworkModal}
+        onHide={() => {
+          setShowNetworkModal(false)
+          buttonDiscoveryClick()
+        }}
         device={selectDevice}
         pass={devicePass}
+      />
+      <Database
+        show={showDatabaseModal}
+        onHide={() => {
+          setShowDatabaseModal(false)
+        }}
       />
     </Container>
   )

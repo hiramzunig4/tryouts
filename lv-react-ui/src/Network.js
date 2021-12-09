@@ -11,7 +11,8 @@ import Modal from 'react-bootstrap/Modal'
 import Stack from 'react-bootstrap/Stack'
 import Button from 'react-bootstrap/Button'
 
-function ModalNetwork(props) {
+function Network(props) {
+
     //radio selector
     const [radioSelected, setRadioSelected] = React.useState("radiodhcp")
     const [stateRadioDhcp, setStateRadioDhcp] = React.useState(true)
@@ -304,6 +305,8 @@ function ModalNetwork(props) {
                 }, 3000);
             }
             else {
+                //FIXME when i send valid config the nervesbackdoor doesent response ok?, i think the response is in the new ip previously config
+                //i dont need to cath the response?
                 api.setNetworkConfigDhcp(result.input, function (res) {
                     console.log(res)
                     if (res.result === "ok") {
@@ -311,6 +314,11 @@ function ModalNetwork(props) {
                         setIsValid(true)
                         setTimeout(() => {
                             setIsValid(false)
+                            form.address = ""
+                            form.gateway = ""
+                            form.dnsprimary = ""
+                            form.dnssecondary = ""
+                            props.onHide()
                         }, 3000);
                     }
                     else {
@@ -469,12 +477,12 @@ function ModalNetwork(props) {
                 </Form>
             </Modal.Body>
             <Modal.Footer>
-                <Button onClick={ButtonGetNetworkConfig_Click}>Get Config</Button>
-                <Button onClick={ButtonSetNetworkConfig_Click}>Set Config</Button>
-                <Button onClick={props.onHide}>Close</Button>
+                <Button variant='dark' onClick={ButtonGetNetworkConfig_Click}>Get Config</Button>
+                <Button variant='dark' onClick={ButtonSetNetworkConfig_Click}>Set Config</Button>
+                <Button variant='dark' onClick={props.onHide}>Close</Button>
             </Modal.Footer>
         </Modal >
     );
 }
 
-export default ModalNetwork;
+export default Network;

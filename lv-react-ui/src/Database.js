@@ -1,28 +1,42 @@
-import './App.css';
-import React from "react";
+import React, { useState } from 'react'
 
-import Row from 'react-bootstrap/Row'
-import Col from 'react-bootstrap/Col'
-import Form from 'react-bootstrap/Form'
+import { faFileUpload } from '@fortawesome/free-solid-svg-icons'
+import { faFileDownload } from '@fortawesome/free-solid-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+
+import Modal from 'react-bootstrap/Modal'
 import Button from 'react-bootstrap/Button'
+import Navbar from 'react-bootstrap/Navbar'
+import Col from 'react-bootstrap/Col'
 
-function Database()
-{ 
+function Database(props) {
+
+  function handleFileSelected() { }
+
   return (
-    <Form>
-      <h1>DATABASE</h1>
-      <Row>
-        <Col xs={6} md={8}>
-          <Form.Label align="left">Select folder to backup</Form.Label>
-        </Col>
-        <Col xs={12} md={8}>
-        <Form.Control type="file" onChange={(e) => console.log(e.target.files)} />
-        </Col>
-        <Col xs={12} md={8}>
-        <Col><Button>Backup</Button></Col>
-        </Col>
-      </Row>
-    </Form>
+    <Modal
+      {...props}
+      size="lg"
+      backdrop="static"
+      aria-labelledby="contained-modal-title-vcenter"
+      centered
+    >
+      <Modal.Header closeButton>
+        <Modal.Title id="contained-modal-title-vcenter">
+          Backup and Restore Database
+        </Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
+        <Navbar >
+          <Navbar.Collapse as={Col} className="justify-content-center">
+            <input onChange={handleFileSelected} type="file" />
+          </Navbar.Collapse>
+        </Navbar>
+      </Modal.Body>
+      <Modal.Footer>
+        <Button onClick={props.onHide}>Close</Button>
+      </Modal.Footer>
+    </Modal >
   );
 }
 
