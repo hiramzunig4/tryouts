@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useRef } from 'react'
 
 import { faFileUpload } from '@fortawesome/free-solid-svg-icons'
 import { faFileDownload } from '@fortawesome/free-solid-svg-icons'
@@ -8,10 +8,14 @@ import Modal from 'react-bootstrap/Modal'
 import Button from 'react-bootstrap/Button'
 import Navbar from 'react-bootstrap/Navbar'
 import Col from 'react-bootstrap/Col'
+import Form from 'react-bootstrap/Form'
+import FormControl from 'react-bootstrap/FormControl'
 
 function Database(props) {
 
-  function handleFileSelected() { }
+  function UploadFile(filename) {
+    console.log(filename[0].name)
+  }
 
   return (
     <Modal
@@ -29,7 +33,9 @@ function Database(props) {
       <Modal.Body>
         <Navbar >
           <Navbar.Collapse as={Col} className="justify-content-center">
-            <input onChange={handleFileSelected} type="file" />
+            <Form>
+              <FormControl type="file" onChange={(e) => UploadFile(e.target.files)} />
+            </Form>
           </Navbar.Collapse>
         </Navbar>
       </Modal.Body>

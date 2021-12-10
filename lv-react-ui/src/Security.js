@@ -1,4 +1,6 @@
-import React, { useState } from 'react'
+import React from 'react'
+
+import api from "./api"
 
 import Modal from 'react-bootstrap/Modal'
 import Button from 'react-bootstrap/Button'
@@ -7,6 +9,44 @@ import Row from 'react-bootstrap/Row'
 import Col from 'react-bootstrap/Col'
 
 function Security(props) {
+
+    const [newPass, setNewPass] = React.useState("")
+
+    function ButtonSetNewPassClick() {
+        api.setNewPass(function (res) {
+            console.log(res)
+            if (res.result === "ok") {
+                console.log("Password Changed")
+            }
+            else {
+                console.log("Error en set password")
+            }
+        }, props.device, "nerves", props.pass, Buffer.from(`${newPass}`).toString('base64'))
+    }
+
+    function ButtonResetPassClick() {
+        api.setDisablePass(function (res) {
+            console.log(res)
+            if (res.result === "ok") {
+                console.log("Reset password ok")
+            }
+            else {
+                console.log("Error reset password")
+            }
+        }, props.device, "nerves", props.pass)
+    }
+
+    function ButtonDisablePassClick() {
+        api.setResetPass(function (res) {
+            console.log(res)
+            if (res.result === "ok") {
+                console.log("Disable Password ok")
+            }
+            else {
+                console.log("Error disable pass")
+            }
+        }, props.device, "nerves", props.pass)
+    }
 
     return (
         <Modal
@@ -18,7 +58,7 @@ function Security(props) {
         >
             <Modal.Header closeButton>
                 <Modal.Title id="contained-modal-title-vcenter">
-                    Security
+                    Password Manager
                 </Modal.Title>
             </Modal.Header>
             <Modal.Body>
@@ -31,15 +71,17 @@ function Security(props) {
                         <Col sm={8}>
                             <Form.Control
                                 placeholder="Enter New Pass"
+                                value={newPass}
+                                onChange={e => setNewPass(e.target.value)}
                             />
                         </Col>
                     </Form.Group>
                 </Form>
             </Modal.Body>
             <Modal.Footer>
-                <Button variant='dark'>Set New Pass</Button>
-                <Button variant='dark'>Reset Pass</Button>
-                <Button variant='dark'>Disable Pass</Button>
+                <Button onClick={ButtonSetNewPassClick} variant='dark'>Set New</Button>
+                <Button onClick={ButtonResetPassClick} variant='dark'>Reset</Button>
+                <Button onClick={ButtonDisablePassClick} variant='dark'>Disable</Button>
                 <Button variant='dark' onClick={props.onHide}>Close</Button>
             </Modal.Footer>
         </Modal >

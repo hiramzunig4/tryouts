@@ -76,6 +76,8 @@ function App() {
   }
 
   function buttonSecurityClick(device) {
+    setSelectDevice(device.data.ipaddr)
+    setDevicePass(device.data.macaddr)
     setShowSecurityModal(true)
   }
 
@@ -165,6 +167,8 @@ function App() {
         onHide={() => {
           setShowSecurityModal(false)
         }}
+        device={selectDevice}
+        pass={devicePass}
       />
     </Container>
   )
