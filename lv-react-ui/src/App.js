@@ -2,8 +2,9 @@ import React, { useState } from 'react'
 
 import './App.css';
 import api from "./api"
-import Network from './Network';
-import Database from './Database';
+import Network from './Network'
+import Security from './Security';
+import Database from './Database'
 
 import { faCog } from '@fortawesome/free-solid-svg-icons'
 import { faDatabase } from '@fortawesome/free-solid-svg-icons'
@@ -23,8 +24,9 @@ import ToastContainer from 'react-bootstrap/ToastContainer'
 function App() {
 
   const [devices, setDevices] = useState([])
-  const [showNetworkModal, setShowNetworkModal] = React.useState(false);
-  const [showDatabaseModal, setShowDatabaseModal] = React.useState(false);
+  const [showNetworkModal, setShowNetworkModal] = React.useState(false)
+  const [showDatabaseModal, setShowDatabaseModal] = React.useState(false)
+  const [showSecurityModal, setShowSecurityModal] = React.useState(false)
   const [showSpinner, setShowSpinner] = React.useState("visually-hidden")
 
   const [messageToToast, setMessageToToast] = React.useState("")
@@ -73,6 +75,10 @@ function App() {
     setShowDatabaseModal(true)
   }
 
+  function buttonSecurityClick(device) {
+    setShowSecurityModal(true)
+  }
+
   const rows = devices.map(device => <tr key="{device.data.macaddr}">
     <td>{device.data.hostname}</td>
     <td>{device.data.macaddr}</td>
@@ -80,7 +86,7 @@ function App() {
     <td>{device.data.ipaddr}</td>
     <td> <Button onClick={() => buttonPingFromDiscover(device)} variant="dark" size="sm"> <FontAwesomeIcon icon={faLaptopCode} /></Button></td>
     <td> <Button onClick={() => buttonBlinkClick(device)} variant="dark" size="sm"> <FontAwesomeIcon icon={faLightbulb} /></Button></td>
-    <td> <Button onClick={() => buttonPingFromDiscover(device)} variant="dark" size="sm"> <FontAwesomeIcon icon={faUserCog} /></Button></td>
+    <td> <Button onClick={() => buttonSecurityClick(device)} variant="dark" size="sm"> <FontAwesomeIcon icon={faUserCog} /></Button></td>
     <td> <Button onClick={() => buttonNetworkClick(device)} variant="dark" size="sm"> <FontAwesomeIcon icon={faCog} /></Button></td>
     <td> <Button onClick={() => buttonDatabaseClick(device)} variant="dark" size="sm"> <FontAwesomeIcon icon={faDatabase} /></Button></td>
   </tr>)
@@ -152,6 +158,12 @@ function App() {
         show={showDatabaseModal}
         onHide={() => {
           setShowDatabaseModal(false)
+        }}
+      />
+      <Security
+        show={showSecurityModal}
+        onHide={() => {
+          setShowSecurityModal(false)
         }}
       />
     </Container>
