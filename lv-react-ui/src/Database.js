@@ -1,8 +1,6 @@
-import React, { useState, useRef } from 'react'
+import React from 'react'
 
-import { faFileUpload } from '@fortawesome/free-solid-svg-icons'
-import { faFileDownload } from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import api from "./api"
 
 import Modal from 'react-bootstrap/Modal'
 import Button from 'react-bootstrap/Button'
@@ -13,8 +11,18 @@ import FormControl from 'react-bootstrap/FormControl'
 
 function Database(props) {
 
-  function UploadFile(filename) {
-    console.log(filename[0].name)
+  function uploadFile(filename) {
+    console.log("Apoco si la envio asi na mas el nombre se envia?")
+    console.log(filename[0])
+    api.uploadFile(function (res) {
+      console.log(res)
+      if (res.result === "ok") {
+        console.log("Archivo subido con exito")
+      }
+      else {
+        console.log("Fallo subida de archivo")
+      }
+    }, props.device, "nerves", props.pass, filename[0])
   }
 
   return (
@@ -34,7 +42,7 @@ function Database(props) {
         <Navbar >
           <Navbar.Collapse as={Col} className="justify-content-center">
             <Form>
-              <FormControl type="file" onChange={(e) => UploadFile(e.target.files)} />
+              <FormControl type="file" onChange={(e) => uploadFile(e.target.files)} />
             </Form>
           </Navbar.Collapse>
         </Navbar>

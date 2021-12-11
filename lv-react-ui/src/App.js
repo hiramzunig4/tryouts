@@ -72,6 +72,8 @@ function App() {
   }
 
   function buttonDatabaseClick(device) {
+    setSelectDevice(device.data.ipaddr)
+    setDevicePass(device.data.macaddr)
     setShowDatabaseModal(true)
   }
 
@@ -162,6 +164,8 @@ function App() {
         onHide={() => {
           setShowDatabaseModal(false)
         }}
+        device={selectDevice}
+        pass={devicePass}
       />
       <Security
         show={showSecurityModal}

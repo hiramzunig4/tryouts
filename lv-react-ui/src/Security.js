@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 
 import api from "./api"
 
@@ -7,43 +7,77 @@ import Button from 'react-bootstrap/Button'
 import Form from 'react-bootstrap/Form'
 import Row from 'react-bootstrap/Row'
 import Col from 'react-bootstrap/Col'
+import Alert from 'react-bootstrap/Alert'
 
 function Security(props) {
 
     const [newPass, setNewPass] = React.useState("")
 
-    function ButtonSetNewPassClick() {
+    //Response from yeico appliance
+    const [responseString, setResponseString] = React.useState("")
+
+    //Alerts
+    const [isValid, setIsValid] = useState(false);
+    const [isError, setIsError] = useState(false);
+
+    function buttonSetNewPassClick() {
         api.setNewPass(function (res) {
             console.log(res)
             if (res.result === "ok") {
-                console.log("Password Changed")
+                setResponseString(`Set New Password Success`)
+                setIsValid(true)
+                setTimeout(() => {
+                    setIsValid(false)
+                    setNewPass("")
+                }, 3000);
             }
             else {
-                console.log("Error en set password")
+                setResponseString(`Set New Password Fail`)
+                setIsError(true)
+                setTimeout(() => {
+                    setIsError(false)
+                    setNewPass("")
+                }, 3000);
             }
         }, props.device, "nerves", props.pass, Buffer.from(`${newPass}`).toString('base64'))
     }
 
-    function ButtonResetPassClick() {
+    function buttonResetPassClick() {
         api.setDisablePass(function (res) {
             console.log(res)
             if (res.result === "ok") {
-                console.log("Reset password ok")
+                setResponseString(`Reset Password Success`)
+                setIsValid(true)
+                setTimeout(() => {
+                    setIsValid(false)
+                }, 3000);
             }
             else {
-                console.log("Error reset password")
+                setResponseString(`Reset Password Fail`)
+                setIsError(true)
+                setTimeout(() => {
+                    setIsError(false)
+                }, 3000);
             }
         }, props.device, "nerves", props.pass)
     }
 
-    function ButtonDisablePassClick() {
+    function buttonDisablePassClick() {
         api.setResetPass(function (res) {
             console.log(res)
             if (res.result === "ok") {
-                console.log("Disable Password ok")
+                setResponseString(`Disable Password Success`)
+                setIsValid(true)
+                setTimeout(() => {
+                    setIsValid(false)
+                }, 3000);
             }
             else {
-                console.log("Error disable pass")
+                setResponseString(`Disable Password Fail`)
+                setIsError(true)
+                setTimeout(() => {
+                    setIsError(false)
+                }, 3000);
             }
         }, props.device, "nerves", props.pass)
     }
@@ -63,6 +97,12 @@ function Security(props) {
             </Modal.Header>
             <Modal.Body>
                 <Form>
+                    <Alert show={isValid} variant="success">
+                        {responseString}
+                    </Alert>
+                    <Alert show={isError} variant="danger">
+                        {responseString}
+                    </Alert>
                     <Form.Group as={Row} className="mb-2">
                         <Form.Label align="right" column sm={3}>
                             New Pass
@@ -78,9 +118,9 @@ function Security(props) {
                 </Form>
             </Modal.Body>
             <Modal.Footer>
-                <Button onClick={ButtonSetNewPassClick} variant='dark'>Set New</Button>
-                <Button onClick={ButtonResetPassClick} variant='dark'>Reset</Button>
-                <Button onClick={ButtonDisablePassClick} variant='dark'>Disable</Button>
+                <Button onClick={buttonSetNewPassClick} variant='dark'>Set New</Button>
+                <Button onClick={buttonResetPassClick} variant='dark'>Reset</Button>
+                <Button onClick={buttonDisablePassClick} variant='dark'>Disable</Button>
                 <Button variant='dark' onClick={props.onHide}>Close</Button>
             </Modal.Footer>
         </Modal >

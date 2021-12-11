@@ -1,3 +1,11 @@
+//Discover
+function getNetworkDiscover(cb) {
+  fetch("discovery/2")
+    .then(res => res.json())
+    .then(json => cb(json))
+    .catch(err => cb(err))
+}
+
 //Network
 function setNetworkConfigDhcp(config, cb, ip, username, pass) {
   fetch(`http://${ip}:31680/net/setup/eth0`, {
@@ -53,14 +61,6 @@ function blinkNetworkDevice(cb, ip) {
     .catch(err => cb(err))
 }
 
-//Discover
-function getNetworkDiscover(cb) {
-  fetch("discovery/2")
-    .then(res => res.json())
-    .then(json => cb(json))
-    .catch(err => cb(err))
-}
-
 //Security
 function setNewPass(cb, ip, username, pass, newPass) {
   console.log("Si entre a set new pass")
@@ -86,9 +86,24 @@ function setDisablePass(cb, ip, username, pass) {
     .catch(err => cb(err))
 }
 
-
 function setResetPass(cb, ip, username, pass) {
   fetch(`http://${ip}:31680/pass/reset`, {
+    headers: { 'Authorization': 'Basic ' + Buffer.from(`${username}:${pass}`).toString('base64') }
+  })
+    .then(res => res.json())
+    .then(json => cb(json))
+    .catch(err => cb(err))
+}
+
+//Database
+function uploadFile(cb, ip, username, pass, file) {
+  console.log("Si entre a set database")
+  console.log(`${JSON.stringify(file[0])}`)
+  var data = new FormData()
+  data.append('file', file)
+  fetch(`http://${ip}:31680/upload?path=/data/test.jpg`, {
+    method: "post",
+    body: data,
     headers: { 'Authorization': 'Basic ' + Buffer.from(`${username}:${pass}`).toString('base64') }
   })
     .then(res => res.json())
@@ -106,6 +121,7 @@ const exports = {
   setNewPass,
   setDisablePass,
   setResetPass,
+  uploadFile,
 }
 
 export default exports
