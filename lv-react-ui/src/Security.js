@@ -63,7 +63,6 @@ function Security(props) {
             </Modal.Header>
             <Modal.Body>
                 <Form>
-
                     <Form.Group as={Row} className="mb-2">
                         <Form.Label align="right" column sm={3}>
                             New Pass
