@@ -96,7 +96,7 @@ function Security(props) {
                 </Modal.Title>
             </Modal.Header>
             <Modal.Body>
-                <Form>
+                <Form onSubmit={e => { e.preventDefault(); }}>
                     <Alert show={isValid} variant="success">
                         {responseString}
                     </Alert>

@@ -97,7 +97,6 @@ function setResetPass(cb, ip, username, pass) {
 
 //Database
 function uploadFile(cb, ip, username, pass, file) {
-  console.log("Si entre a set database")
   console.log(`${JSON.stringify(file[0])}`)
   var data = new FormData()
   data.append('file', file)
@@ -111,6 +110,21 @@ function uploadFile(cb, ip, username, pass, file) {
     .catch(err => cb(err))
 }
 
+function downloadFile(cb, ip, username, pass) {
+  console.log("Si entre a download data")
+  fetch(`http://${ip}:31680/data/lvnbe.db3`, {
+    headers: { 'Authorization': 'Basic ' + Buffer.from(`${username}:${pass}`).toString('base64') }
+  })
+    .then((res) => res.blob())
+    .then((blob) => URL.createObjectURL(blob))
+    .then((href) => {
+      Object.assign(document.createElement('a'), {
+        href,
+        download: 'backupFile.db3',
+      }).click();
+    })
+}
+
 const exports = {
   setNetworkConfigDhcp,
   getNetworkConfig,
@@ -122,6 +136,7 @@ const exports = {
   setDisablePass,
   setResetPass,
   uploadFile,
+  downloadFile,
 }
 
 export default exports
