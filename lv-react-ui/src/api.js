@@ -64,9 +64,11 @@ function getNetworkDiscover(cb) {
 //Security
 function setNewPass(cb, ip, username, pass, newPass) {
   console.log("Si entre a set new pass")
+  const data = new FormData()
+  data.append("pass", newPass)
   fetch(`http://${ip}:31680/pass/set`, {
     method: "post",
-    body: `${newPass}`,
+    body: data,
     headers: { 'Authorization': 'Basic ' + Buffer.from(`${username}:${pass}`).toString('base64') }
   })
     .then(res => res.json())
@@ -86,7 +88,6 @@ function setDisablePass(cb, ip, username, pass) {
 
 
 function setResetPass(cb, ip, username, pass) {
-  console.log("Si entre a set new pass")
   fetch(`http://${ip}:31680/pass/reset`, {
     headers: { 'Authorization': 'Basic ' + Buffer.from(`${username}:${pass}`).toString('base64') }
   })

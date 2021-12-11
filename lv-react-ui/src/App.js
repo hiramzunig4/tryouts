@@ -81,17 +81,18 @@ function App() {
     setShowSecurityModal(true)
   }
 
-  const rows = devices.map(device => <tr key="{device.data.macaddr}">
-    <td>{device.data.hostname}</td>
-    <td>{device.data.macaddr}</td>
-    <td>{device.data.version}</td>
-    <td>{device.data.ipaddr}</td>
-    <td> <Button onClick={() => buttonPingFromDiscover(device)} variant="dark" size="sm"> <FontAwesomeIcon icon={faLaptopCode} /></Button></td>
-    <td> <Button onClick={() => buttonBlinkClick(device)} variant="dark" size="sm"> <FontAwesomeIcon icon={faLightbulb} /></Button></td>
-    <td> <Button onClick={() => buttonSecurityClick(device)} variant="dark" size="sm"> <FontAwesomeIcon icon={faUserCog} /></Button></td>
-    <td> <Button onClick={() => buttonNetworkClick(device)} variant="dark" size="sm"> <FontAwesomeIcon icon={faCog} /></Button></td>
-    <td> <Button onClick={() => buttonDatabaseClick(device)} variant="dark" size="sm"> <FontAwesomeIcon icon={faDatabase} /></Button></td>
-  </tr>)
+  const rows = devices.map(device =>
+    <tr key={device.data.macaddr}>
+      <td>{device.data.hostname}</td>
+      <td>{device.data.macaddr}</td>
+      <td>{device.data.version}</td>
+      <td>{device.data.ipaddr}</td>
+      <td> <Button onClick={() => buttonPingFromDiscover(device)} variant="dark" size="sm"> <FontAwesomeIcon icon={faLaptopCode} /></Button></td>
+      <td> <Button onClick={() => buttonBlinkClick(device)} variant="dark" size="sm"> <FontAwesomeIcon icon={faLightbulb} /></Button></td>
+      <td> <Button onClick={() => buttonSecurityClick(device)} variant="dark" size="sm"> <FontAwesomeIcon icon={faUserCog} /></Button></td>
+      <td> <Button onClick={() => buttonNetworkClick(device)} variant="dark" size="sm"> <FontAwesomeIcon icon={faCog} /></Button></td>
+      <td> <Button onClick={() => buttonDatabaseClick(device)} variant="dark" size="sm"> <FontAwesomeIcon icon={faDatabase} /></Button></td>
+    </tr>)
 
   function setTypeOfToast(color, message) {
     setToastColor(color)
@@ -134,7 +135,7 @@ function App() {
             <th>Ping</th>
             <th>Blink</th>
             <th>Security</th>
-            <th>Network Config</th>
+            <th>Network</th>
             <th>Database</th>
           </tr>
         </thead>
