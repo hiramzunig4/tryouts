@@ -100,7 +100,7 @@ function uploadFile(cb, ip, username, pass, file) {
   console.log(`${JSON.stringify(file[0])}`)
   var data = new FormData()
   data.append('file', file)
-  fetch(`http://${ip}:31680/upload?path=/data/test.jpg`, {
+  fetch(`http://${ip}:31680/upload?path=/data/lvnbe.db3`, {
     method: "post",
     body: data,
     headers: { 'Authorization': 'Basic ' + Buffer.from(`${username}:${pass}`).toString('base64') }
