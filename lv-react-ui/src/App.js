@@ -1,16 +1,16 @@
 import React, { useState } from 'react'
 
-import './App.css';
+import './App.css'
 import api from "./api"
 import Network from './Network'
-import Security from './Security';
 import Database from './Database'
+import Security from './Security'
 
 import { faCog } from '@fortawesome/free-solid-svg-icons'
+import { faUserCog } from '@fortawesome/free-solid-svg-icons'
 import { faDatabase } from '@fortawesome/free-solid-svg-icons'
 import { faLightbulb } from '@fortawesome/free-solid-svg-icons'
 import { faLaptopCode } from '@fortawesome/free-solid-svg-icons'
-import { faUserCog } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
 import Table from 'react-bootstrap/Table'
@@ -33,14 +33,30 @@ function App() {
   const [toastColor, setToastColor] = React.useState("dark")
   const [showToast, setShowToast] = useState(false);
 
-  const [selectDevice, setSelectDevice] = React.useState("")
+  const [selectIpDevice, setSelectIpDevice] = React.useState("")
+  const [selectMacDevice, setSelectMacDevice] = React.useState("")
   const [devicePass, setDevicePass] = React.useState("")
+
+  function saveLocalStorage(res) {
+    //save devices with password
+    for (let i = 0; i <= res.length - 1; i++) {
+      //if device dont exist, save local storage
+      if (!(localStorage.getItem(`${res[i].data.macaddr}`))) {
+        localStorage.setItem(`${res[i].data.macaddr}`, res[i].data.macaddr)
+      }
+    }
+  }
+
+  function getPassFromLocalStorage(device) {
+    return localStorage.getItem(device)
+  }
 
   function buttonDiscoveryClick() {
     setShowSpinner("")
     api.getNetworkDiscover(function (res) {
       console.log(JSON.stringify(res))
       setShowSpinner("visually-hidden")
+      saveLocalStorage(res)
       setDevices(res)
     })
   }
@@ -54,6 +70,7 @@ function App() {
 
 
   function buttonPingFromDiscover(device) {
+    var deviceLocal = getPassFromLocalStorage(device.data.macaddr)
     api.getNetworkPing(function (res) {
       console.log(res)
       if (res.result === "ok") {
@@ -62,24 +79,30 @@ function App() {
       else {
         setTypeOfToast('danger', `Ping to ${device.data.ipaddr} failed`)
       }
-    }, device.data.ipaddr, "nerves", device.data.macaddr)
+    }, device.data.ipaddr, "nerves", deviceLocal)
   }
 
   function buttonNetworkClick(device) {
-    setSelectDevice(device.data.ipaddr)
-    setDevicePass(device.data.macaddr)
+    setSelectIpDevice(device.data.ipaddr)
+    var deviceLocal = getPassFromLocalStorage(device.data.macaddr)
+    setDevicePass(deviceLocal)
+    setSelectMacDevice(device.data.macaddr)
     setShowNetworkModal(true)
   }
 
   function buttonDatabaseClick(device) {
-    setSelectDevice(device.data.ipaddr)
-    setDevicePass(device.data.macaddr)
+    setSelectIpDevice(device.data.ipaddr)
+    var deviceLocal = getPassFromLocalStorage(device.data.macaddr)
+    setDevicePass(deviceLocal)
+    setSelectMacDevice(device.data.macaddr)
     setShowDatabaseModal(true)
   }
 
   function buttonSecurityClick(device) {
-    setSelectDevice(device.data.ipaddr)
-    setDevicePass(device.data.macaddr)
+    setSelectIpDevice(device.data.ipaddr)
+    var deviceLocal = getPassFromLocalStorage(device.data.macaddr)
+    setDevicePass(deviceLocal)
+    setSelectMacDevice(device.data.macaddr)
     setShowSecurityModal(true)
   }
 
@@ -94,7 +117,8 @@ function App() {
       <td> <Button onClick={() => buttonSecurityClick(device)} variant="dark" size="sm"> <FontAwesomeIcon icon={faUserCog} /></Button></td>
       <td> <Button onClick={() => buttonNetworkClick(device)} variant="dark" size="sm"> <FontAwesomeIcon icon={faCog} /></Button></td>
       <td> <Button onClick={() => buttonDatabaseClick(device)} variant="dark" size="sm"> <FontAwesomeIcon icon={faDatabase} /></Button></td>
-    </tr>)
+    </tr>
+  )
 
   function setTypeOfToast(color, message) {
     setToastColor(color)
@@ -156,24 +180,27 @@ function App() {
           setShowNetworkModal(false)
           buttonDiscoveryClick()
         }}
-        device={selectDevice}
+        device={selectIpDevice}
         pass={devicePass}
+        mac={selectMacDevice}
       />
       <Database
         show={showDatabaseModal}
         onHide={() => {
           setShowDatabaseModal(false)
         }}
-        device={selectDevice}
+        device={selectIpDevice}
         pass={devicePass}
+        mac={selectMacDevice}
       />
       <Security
         show={showSecurityModal}
         onHide={() => {
           setShowSecurityModal(false)
         }}
-        device={selectDevice}
+        device={selectIpDevice}
         pass={devicePass}
+        mac={selectMacDevice}
       />
     </Container>
   )

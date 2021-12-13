@@ -21,11 +21,13 @@ function Security(props) {
     const [isError, setIsError] = useState(false);
 
     function buttonSetNewPassClick() {
+        console.log(props.pass)
         api.setNewPass(function (res) {
             console.log(res)
             if (res.result === "ok") {
                 setResponseString(`Set New Password Success`)
                 setIsValid(true)
+                localStorage.setItem(props.mac, newPass)
                 setTimeout(() => {
                     setIsValid(false)
                     setNewPass("")
@@ -48,6 +50,7 @@ function Security(props) {
             if (res.result === "ok") {
                 setResponseString(`Reset Password Success`)
                 setIsValid(true)
+                localStorage.setItem(props.mac, props.mac)
                 setTimeout(() => {
                     setIsValid(false)
                 }, 3000);
