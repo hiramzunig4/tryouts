@@ -27,10 +27,10 @@ function Settings(props) {
             if (res.result === "ok") {
                 setResponseString(`Set New Password Success`)
                 setIsValid(true)
+                setNewPass("")
                 localStorage.setItem(props.mac, newPass)
                 setTimeout(() => {
                     setIsValid(false)
-                    setNewPass("")
                 }, 3000);
             }
             else {
@@ -57,26 +57,6 @@ function Settings(props) {
             }
             else {
                 setResponseString(`Reset Password Fail`)
-                setIsError(true)
-                setTimeout(() => {
-                    setIsError(false)
-                }, 3000);
-            }
-        }, props.device, "nerves", props.pass)
-    }
-
-    function buttonDisablePassClick() {
-        api.setResetPass(function (res) {
-            console.log(res)
-            if (res.result === "ok") {
-                setResponseString(`Disable Password Success`)
-                setIsValid(true)
-                setTimeout(() => {
-                    setIsValid(false)
-                }, 3000);
-            }
-            else {
-                setResponseString(`Disable Password Fail`)
                 setIsError(true)
                 setTimeout(() => {
                     setIsError(false)
@@ -124,7 +104,6 @@ function Settings(props) {
             <Modal.Footer>
                 <Button onClick={buttonSetNewPassClick} variant='dark'>Set New</Button>
                 <Button onClick={buttonResetPassClick} variant='dark'>Reset</Button>
-                <Button onClick={buttonDisablePassClick} variant='dark'>Disable</Button>
                 <Button variant='dark' onClick={props.onHide}>Close</Button>
             </Modal.Footer>
         </Modal >
