@@ -22,6 +22,9 @@ function Database(props) {
   function uploadFile(filename) {
     console.log("Apoco si la envio asi na mas el nombre se envia?")
     console.log(filename[0])
+    api.stopApp(function (res) {
+      console.log(res)
+    }, props.device, "nerves", props.pass)
     api.uploadFile(function (res) {
       console.log(res)
       if (res.result === "ok") {
@@ -39,13 +42,19 @@ function Database(props) {
         }, 3000);
       }
     }, props.device, "nerves", props.pass, filename[0])
+    api.startApp(function (res) {
+      console.log(res)
+    }, props.device, "nerves", props.pass)
   }
 
   function downloadFile() {
+    api.stopApp(function (res) {
+      console.log(res)
+    }, props.device, "nerves", props.pass)
     api.downloadFile(function (res) {
       console.log(res)
       if (res.result === "ok") {
-        setResponseString(`File Downloades`)
+        setResponseString(`File Downloaded`)
         setIsValid(true)
         setTimeout(() => {
           setIsValid(false)
@@ -58,6 +67,9 @@ function Database(props) {
           setIsError(false)
         }, 3000);
       }
+    }, props.device, "nerves", props.pass)
+    api.startApp(function (res) {
+      console.log(res)
     }, props.device, "nerves", props.pass)
   }
 
@@ -87,7 +99,7 @@ function Database(props) {
               <Form.Label align="left" column sm={3}>
                 Restore
               </Form.Label>
-              <FormControl type="file" onChange={(e) => uploadFile(e.target.files)} />
+              <FormControl variant="dark" type="file" onChange={(e) => uploadFile(e.target.files)} />
             </Form>
           </Navbar.Collapse>
         </Navbar>

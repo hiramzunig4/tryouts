@@ -111,7 +111,6 @@ function uploadFile(cb, ip, username, pass, file) {
 }
 
 function downloadFile(cb, ip, username, pass) {
-  console.log("Si entre a download data")
   fetch(`http://${ip}:31680/data/lvnbe.db3`, {
     headers: { 'Authorization': 'Basic ' + Buffer.from(`${username}:${pass}`).toString('base64') }
   })
@@ -125,18 +124,40 @@ function downloadFile(cb, ip, username, pass) {
     })
 }
 
+function stopApp(cb, ip, username, pass) {
+  fetch(`http://${ip}:31680/app/stop/nfw`, {
+    method: "post",
+    headers: { 'Authorization': 'Basic ' + Buffer.from(`${username}:${pass}`).toString('base64') }
+  })
+    .then(res => res.json())
+    .then(json => cb(json))
+    .catch(err => cb(err))
+}
+
+function startApp(cb, ip, username, pass) {
+  fetch(`http://${ip}:31680/app/start/nfw`, {
+    method: "post",
+    headers: { 'Authorization': 'Basic ' + Buffer.from(`${username}:${pass}`).toString('base64') }
+  })
+    .then(res => res.json())
+    .then(json => cb(json))
+    .catch(err => cb(err))
+}
+
 const exports = {
-  setNetworkConfigDhcp,
-  getNetworkConfig,
+  stopApp,
+  startApp,
+  uploadFile,
+  setNewPass,
+  downloadFile,
+  setResetPass,
+  setDisablePass,
   getNetworkPing,
-  setNetworkConfigStatic,
+  getNetworkConfig,
   getNetworkDiscover,
   blinkNetworkDevice,
-  setNewPass,
-  setDisablePass,
-  setResetPass,
-  uploadFile,
-  downloadFile,
+  setNetworkConfigDhcp,
+  setNetworkConfigStatic,
 }
 
 export default exports

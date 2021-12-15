@@ -1,17 +1,15 @@
 import React, { useState } from 'react'
 
 import api from "./api"
-
-import Modal from 'react-bootstrap/Modal'
-import Button from 'react-bootstrap/Button'
-import Form from 'react-bootstrap/Form'
 import Row from 'react-bootstrap/Row'
 import Col from 'react-bootstrap/Col'
+import Form from 'react-bootstrap/Form'
+import Modal from 'react-bootstrap/Modal'
 import Alert from 'react-bootstrap/Alert'
+import Button from 'react-bootstrap/Button'
 
 function Settings(props) {
 
-    const [newPass, setNewPass] = React.useState("")
     const [currentPass, setCurrentPass] = React.useState("")
 
     //Response from yeico appliance
