@@ -88,14 +88,12 @@ function Database(props) {
                 Restore
               </Form.Label>
               <FormControl type="file" onChange={(e) => uploadFile(e.target.files)} />
-              <Form.Label align="left" column sm={5}>
-                <Button variant="dark" onClick={downloadFile}>Backup</Button>
-              </Form.Label>
             </Form>
           </Navbar.Collapse>
         </Navbar>
       </Modal.Body>
       <Modal.Footer>
+        <Button variant="dark" onClick={downloadFile}>Backup</Button>
         <Button variant="dark" onClick={props.onHide}>Close</Button>
       </Modal.Footer>
     </Modal >
