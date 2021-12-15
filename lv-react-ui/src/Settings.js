@@ -9,7 +9,7 @@ import Row from 'react-bootstrap/Row'
 import Col from 'react-bootstrap/Col'
 import Alert from 'react-bootstrap/Alert'
 
-function Security(props) {
+function Settings(props) {
 
     const [newPass, setNewPass] = React.useState("")
     const [currentPass, setCurrentPass] = React.useState("")
@@ -171,4 +171,4 @@ function Security(props) {
     );
 }
 
-export default Security;
+export default Settings;

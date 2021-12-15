@@ -4,13 +4,14 @@ import './App.css'
 import api from "./api"
 import Network from './Network'
 import Database from './Database'
-import Security from './Security'
+import Settings from './Settings'
 
 import { faCog } from '@fortawesome/free-solid-svg-icons'
 import { faUserCog } from '@fortawesome/free-solid-svg-icons'
 import { faDatabase } from '@fortawesome/free-solid-svg-icons'
 import { faLightbulb } from '@fortawesome/free-solid-svg-icons'
 import { faLaptopCode } from '@fortawesome/free-solid-svg-icons'
+import { faSignInAlt } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
 import Table from 'react-bootstrap/Table'
@@ -26,7 +27,8 @@ function App() {
   const [devices, setDevices] = useState([])
   const [showNetworkModal, setShowNetworkModal] = React.useState(false)
   const [showDatabaseModal, setShowDatabaseModal] = React.useState(false)
-  const [showSecurityModal, setShowSecurityModal] = React.useState(false)
+  const [showSettingsModal, setShowSettingsModal] = React.useState(false)
+  const [showLoginModal, setShowLoginModal] = React.useState(false)
   const [showSpinner, setShowSpinner] = React.useState("visually-hidden")
 
   const [messageToToast, setMessageToToast] = React.useState("")
@@ -98,12 +100,17 @@ function App() {
     setShowDatabaseModal(true)
   }
 
-  function buttonSecurityClick(device) {
+  function buttonSettingsClick(device) {
     setSelectIpDevice(device.data.ipaddr)
     var deviceLocal = getPassFromLocalStorage(device.data.macaddr)
     setDevicePass(deviceLocal)
     setSelectMacDevice(device.data.macaddr)
-    setShowSecurityModal(true)
+    setShowSettingsModal(true)
+  }
+
+
+  function buttonLoginClick(device) {
+
   }
 
   const rows = devices.map(device =>
@@ -112,9 +119,10 @@ function App() {
       <td>{device.data.macaddr}</td>
       <td>{device.data.version}</td>
       <td>{device.data.ipaddr}</td>
+      <td> <Button onClick={() => buttonLoginClick(device)} variant="dark" size="sm"> <FontAwesomeIcon icon={faSignInAlt} /></Button></td>
       <td> <Button onClick={() => buttonPingFromDiscover(device)} variant="dark" size="sm"> <FontAwesomeIcon icon={faLaptopCode} /></Button></td>
       <td> <Button onClick={() => buttonBlinkClick(device)} variant="dark" size="sm"> <FontAwesomeIcon icon={faLightbulb} /></Button></td>
-      <td> <Button onClick={() => buttonSecurityClick(device)} variant="dark" size="sm"> <FontAwesomeIcon icon={faUserCog} /></Button></td>
+      <td> <Button onClick={() => buttonSettingsClick(device)} variant="dark" size="sm"> <FontAwesomeIcon icon={faUserCog} /></Button></td>
       <td> <Button onClick={() => buttonNetworkClick(device)} variant="dark" size="sm"> <FontAwesomeIcon icon={faCog} /></Button></td>
       <td> <Button onClick={() => buttonDatabaseClick(device)} variant="dark" size="sm"> <FontAwesomeIcon icon={faDatabase} /></Button></td>
     </tr>
@@ -158,9 +166,10 @@ function App() {
             <th>MAC Address</th>
             <th>Version</th>
             <th>IP Address</th>
+            <th>Login</th>
             <th>Ping</th>
             <th>Blink</th>
-            <th>Security</th>
+            <th>Settings</th>
             <th>Network</th>
             <th>Database</th>
           </tr>
@@ -193,10 +202,10 @@ function App() {
         pass={devicePass}
         mac={selectMacDevice}
       />
-      <Security
-        show={showSecurityModal}
+      <Settings
+        show={showSettingsModal}
         onHide={() => {
-          setShowSecurityModal(false)
+          setShowSettingsModal(false)
         }}
         device={selectIpDevice}
         pass={devicePass}
