@@ -5,6 +5,7 @@ import api from "./api"
 import Network from './Network'
 import Database from './Database'
 import Settings from './Settings'
+import Login from './Login'
 
 import { faCog } from '@fortawesome/free-solid-svg-icons'
 import { faUserCog } from '@fortawesome/free-solid-svg-icons'
@@ -108,9 +109,12 @@ function App() {
     setShowSettingsModal(true)
   }
 
-
   function buttonLoginClick(device) {
-
+    setSelectIpDevice(device.data.ipaddr)
+    var deviceLocal = getPassFromLocalStorage(device.data.macaddr)
+    setDevicePass(deviceLocal)
+    setSelectMacDevice(device.data.macaddr)
+    setShowLoginModal(true)
   }
 
   const rows = devices.map(device =>
@@ -206,6 +210,15 @@ function App() {
         show={showSettingsModal}
         onHide={() => {
           setShowSettingsModal(false)
+        }}
+        device={selectIpDevice}
+        pass={devicePass}
+        mac={selectMacDevice}
+      />
+      <Login
+        show={showLoginModal}
+        onHide={() => {
+          setShowLoginModal(false)
         }}
         device={selectIpDevice}
         pass={devicePass}

@@ -12,7 +12,6 @@ import Alert from 'react-bootstrap/Alert'
 function Settings(props) {
 
     const [newPass, setNewPass] = React.useState("")
-    const [currentPass, setCurrentPass] = React.useState("")
 
     //Response from yeico appliance
     const [responseString, setResponseString] = React.useState("")
@@ -86,29 +85,6 @@ function Settings(props) {
         }, props.device, "nerves", props.pass)
     }
 
-    function buttonLoginClick() {
-        api.getNetworkPing(function (res) {
-            console.log(res)
-            if (res.result === "ok") {
-                setResponseString(`Login Success`)
-                setIsValid(true)
-                localStorage.setItem(props.mac, currentPass)
-                setTimeout(() => {
-                    setIsValid(false)
-                    setCurrentPass("")
-                }, 3000);
-            }
-            else {
-                setResponseString(`Login Fail Chek Password`)
-                setIsError(true)
-                setTimeout(() => {
-                    setIsError(false)
-                    setCurrentPass("")
-                }, 3000);
-            }
-        }, props.device, "nerves", currentPass)
-    }
-
     return (
         <Modal
             {...props}
@@ -130,22 +106,6 @@ function Settings(props) {
                     <Alert show={isError} variant="danger">
                         {responseString}
                     </Alert>
-
-                    <Form.Group as={Row} className="mb-2">
-                        <Form.Label align="right" column sm={3}>
-                            Login
-                        </Form.Label>
-                        <Col sm={4}>
-                            <Form.Control
-                                type="password"
-                                placeholder="Enter Current Pass"
-                                value={currentPass}
-                                onChange={e => setCurrentPass(e.target.value)}
-                            /></Col>
-                        <Col sm={4}>
-                            <Button onClick={buttonLoginClick} variant='dark'>Set Current Pass</Button>
-                        </Col>
-                    </Form.Group>
                     <Form.Group as={Row} className="mb-2">
                         <Form.Label align="right" column sm={3}>
                             New Pass
