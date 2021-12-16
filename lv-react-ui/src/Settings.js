@@ -22,13 +22,15 @@ function Settings(props) {
 
     function buttonSetNewPassClick() {
         console.log(props.pass)
+        var passEncode = Buffer.from(newPass).toString('base64')
         api.setNewPass(function (res) {
             console.log(res)
             if (res.result === "ok") {
                 setResponseString(`Set New Password Success`)
                 setIsValid(true)
                 setNewPass("")
-                localStorage.setItem(props.mac, newPass)
+
+                localStorage.setItem(props.mac, passEncode)
                 setTimeout(() => {
                     setIsValid(false)
                 }, 3000);
@@ -45,12 +47,13 @@ function Settings(props) {
     }
 
     function buttonResetPassClick() {
+        var passEncode = Buffer.from(props.mac).toString('base64')
         api.setDisablePass(function (res) {
             console.log(res)
             if (res.result === "ok") {
                 setResponseString(`Reset Password Success`)
                 setIsValid(true)
-                localStorage.setItem(props.mac, props.mac)
+                localStorage.setItem(props.mac, passEncode)
                 setTimeout(() => {
                     setIsValid(false)
                 }, 3000);

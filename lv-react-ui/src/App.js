@@ -11,8 +11,8 @@ import { faCog } from '@fortawesome/free-solid-svg-icons'
 import { faUserCog } from '@fortawesome/free-solid-svg-icons'
 import { faDatabase } from '@fortawesome/free-solid-svg-icons'
 import { faLightbulb } from '@fortawesome/free-solid-svg-icons'
-import { faLaptopCode } from '@fortawesome/free-solid-svg-icons'
 import { faSignInAlt } from '@fortawesome/free-solid-svg-icons'
+import { faLaptopCode } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
 import Table from 'react-bootstrap/Table'
@@ -45,7 +45,8 @@ function App() {
     for (let i = 0; i <= res.length - 1; i++) {
       //if device dont exist, save local storage
       if (!(localStorage.getItem(`${res[i].data.macaddr}`))) {
-        localStorage.setItem(`${res[i].data.macaddr}`, res[i].data.macaddr)
+        var passEncode = Buffer.from(`${res[i].data.macaddr}`).toString('base64')
+        localStorage.setItem(`${res[i].data.macaddr}`, passEncode)
       }
     }
   }
@@ -73,7 +74,8 @@ function App() {
 
 
   function buttonPingFromDiscover(device) {
-    var deviceLocal = getPassFromLocalStorage(device.data.macaddr)
+    var passEncode = getPassFromLocalStorage(device.data.macaddr)
+    var deviceLocal = Buffer.from(passEncode, 'base64').toString('ascii')
     api.getNetworkPing(function (res) {
       console.log(res)
       if (res.result === "ok") {
@@ -87,7 +89,8 @@ function App() {
 
   function buttonNetworkClick(device) {
     setSelectIpDevice(device.data.ipaddr)
-    var deviceLocal = getPassFromLocalStorage(device.data.macaddr)
+    var passEncode = getPassFromLocalStorage(device.data.macaddr)
+    var deviceLocal = Buffer.from(passEncode, 'base64').toString('ascii')
     setDevicePass(deviceLocal)
     setSelectMacDevice(device.data.macaddr)
     setShowNetworkModal(true)
@@ -95,15 +98,17 @@ function App() {
 
   function buttonDatabaseClick(device) {
     setSelectIpDevice(device.data.ipaddr)
-    var deviceLocal = getPassFromLocalStorage(device.data.macaddr)
-    setDevicePass(deviceLocal)
+    var passEncode = getPassFromLocalStorage(device.data.macaddr)
+    var deviceLocal = Buffer.from(passEncode, 'base64').toString('ascii')
     setSelectMacDevice(device.data.macaddr)
+    setDevicePass(deviceLocal)
     setShowDatabaseModal(true)
   }
 
   function buttonSettingsClick(device) {
     setSelectIpDevice(device.data.ipaddr)
-    var deviceLocal = getPassFromLocalStorage(device.data.macaddr)
+    var passEncode = getPassFromLocalStorage(device.data.macaddr)
+    var deviceLocal = Buffer.from(passEncode, 'base64').toString('ascii')
     setDevicePass(deviceLocal)
     setSelectMacDevice(device.data.macaddr)
     setShowSettingsModal(true)
@@ -111,7 +116,8 @@ function App() {
 
   function buttonLoginClick(device) {
     setSelectIpDevice(device.data.ipaddr)
-    var deviceLocal = getPassFromLocalStorage(device.data.macaddr)
+    var passEncode = getPassFromLocalStorage(device.data.macaddr)
+    var deviceLocal = Buffer.from(passEncode, 'base64').toString('ascii')
     setDevicePass(deviceLocal)
     setSelectMacDevice(device.data.macaddr)
     setShowLoginModal(true)

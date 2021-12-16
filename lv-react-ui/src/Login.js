@@ -20,12 +20,13 @@ function Settings(props) {
     const [isError, setIsError] = useState(false);
 
     function buttonLoginClick() {
+        var passEncode = Buffer.from(currentPass).toString('base64')
         api.getNetworkPing(function (res) {
             console.log(res)
             if (res.result === "ok") {
                 setResponseString(`Login Success`)
                 setIsValid(true)
-                localStorage.setItem(props.mac, currentPass)
+                localStorage.setItem(props.mac, passEncode)
                 setTimeout(() => {
                     setIsValid(false)
                     setCurrentPass("")
