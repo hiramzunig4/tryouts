@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 
 import './App.css'
 import api from "./api"
@@ -25,7 +25,14 @@ import ToastContainer from 'react-bootstrap/ToastContainer'
 
 function App() {
 
+  useEffect(() => {
+    if (discoverOnload) {
+      buttonDiscoveryClick()
+    }
+  })
+
   const [devices, setDevices] = useState([])
+  const [discoverOnload, setDiscoverOnLoad] = React.useState(true)
   const [showNetworkModal, setShowNetworkModal] = React.useState(false)
   const [showDatabaseModal, setShowDatabaseModal] = React.useState(false)
   const [showSettingsModal, setShowSettingsModal] = React.useState(false)
@@ -56,6 +63,10 @@ function App() {
   }
 
   function buttonDiscoveryClick() {
+    //onload
+    if (discoverOnload) {
+      setDiscoverOnLoad(false)
+    }
     setShowSpinner("")
     api.getNetworkDiscover(function (res) {
       console.log(JSON.stringify(res))
