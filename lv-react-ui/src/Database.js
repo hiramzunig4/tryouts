@@ -51,23 +51,7 @@ function Database(props) {
     api.stopApp(function (res) {
       console.log(res)
     }, props.device, "nerves", props.pass)
-    api.downloadFile(function (res) {
-      console.log(res)
-      if (res.result === "ok") {
-        setResponseString(`File Downloaded`)
-        setIsValid(true)
-        setTimeout(() => {
-          setIsValid(false)
-        }, 3000);
-      }
-      else {
-        setResponseString(`File Download Fail`)
-        setIsError(true)
-        setTimeout(() => {
-          setIsError(false)
-        }, 3000);
-      }
-    }, props.device, "nerves", props.pass)
+    api.downloadFile(props.device, "nerves", props.pass, props.mac)
     api.startApp(function (res) {
       console.log(res)
     }, props.device, "nerves", props.pass)

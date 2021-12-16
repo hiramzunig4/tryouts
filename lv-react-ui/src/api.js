@@ -110,7 +110,8 @@ function uploadFile(cb, ip, username, pass, file) {
     .catch(err => cb(err))
 }
 
-function downloadFile(cb, ip, username, pass) {
+function downloadFile(ip, username, pass, mac) {
+  var tms = new Date().toISOString()
   fetch(`http://${ip}:31680/data/lvnbe.db3`, {
     headers: { 'Authorization': 'Basic ' + Buffer.from(`${username}:${pass}`).toString('base64') }
   })
@@ -119,7 +120,7 @@ function downloadFile(cb, ip, username, pass) {
     .then((href) => {
       Object.assign(document.createElement('a'), {
         href,
-        download: 'backupFile.db3',
+        download: `lv-database-${mac}-${tms}.db3`,
       }).click();
     })
 }
