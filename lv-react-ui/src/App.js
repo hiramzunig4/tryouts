@@ -12,6 +12,7 @@ import { faUserCog } from '@fortawesome/free-solid-svg-icons'
 import { faDatabase } from '@fortawesome/free-solid-svg-icons'
 import { faLightbulb } from '@fortawesome/free-solid-svg-icons'
 import { faSignInAlt } from '@fortawesome/free-solid-svg-icons'
+import { faSignOutAlt } from '@fortawesome/free-solid-svg-icons'
 import { faLaptopCode } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
@@ -134,6 +135,10 @@ function App() {
     setShowLoginModal(true)
   }
 
+  function buttonLogoutClick() {
+    localStorage.clear()
+  }
+
   const rows = devices.map(device =>
     <tr key={device.data.macaddr}>
       <td>{device.data.hostname}</td>
@@ -176,6 +181,7 @@ function App() {
       {toastMessages(messageToToast, toastColor)}
       <Navbar >
         <Navbar.Brand>Laurel View Setup</Navbar.Brand>
+        <Button onClick={() => buttonLogoutClick()} variant="dark" size="sm" title="Logout"> <FontAwesomeIcon icon={faSignOutAlt} /></Button>
         <Navbar.Collapse className="justify-content-end">
           <Button onClick={buttonDiscoveryClick} variant="dark" title="Discover Devices">Discovery</Button>
         </Navbar.Collapse>

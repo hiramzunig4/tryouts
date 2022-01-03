@@ -57,6 +57,13 @@ function Database(props) {
     }, props.device, "nerves", props.pass)
   }
 
+  const hiddenFileInput = React.useRef(null);
+
+  const handleClick = event => {
+    hiddenFileInput.current.click();
+  }
+
+
   return (
     <Modal
       {...props}
@@ -80,10 +87,10 @@ function Database(props) {
               <Alert show={isError} variant="danger">
                 {responseString}
               </Alert>
-              <Form.Label align="left" column sm={3}>
-                Restore
-              </Form.Label>
-              <FormControl variant="dark" type="file" onChange={(e) => uploadFile(e.target.files)} />
+              <Button onClick={handleClick}>
+                Upload a file
+              </Button>
+              <FormControl type="file" style={{ display: 'none' }} ref={hiddenFileInput} onChange={(e) => uploadFile(e.target.files)} />
             </Form>
           </Navbar.Collapse>
         </Navbar>

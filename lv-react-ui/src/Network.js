@@ -101,6 +101,7 @@ function Network(props) {
     }
 
     function ButtonGetNetworkConfig_Click() {
+
         console.log("clicked in get config");
         api.getNetworkConfig(function (res) {
             console.log(res)
