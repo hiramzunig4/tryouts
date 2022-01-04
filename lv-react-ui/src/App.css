@@ -54,3 +54,7 @@ input[type='radio']:checked:after {
   visibility: visible;
   border: 1px solid white;
 }
+
+.btn-space {
+  margin-right: 5px;
+}

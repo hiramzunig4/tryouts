@@ -9,6 +9,7 @@ import Modal from 'react-bootstrap/Modal'
 import Button from 'react-bootstrap/Button'
 import Navbar from 'react-bootstrap/Navbar'
 import FormControl from 'react-bootstrap/FormControl'
+import Row from 'react-bootstrap/Row'
 
 function Database(props) {
 
@@ -20,31 +21,36 @@ function Database(props) {
   const [isError, setIsError] = useState(false);
 
   function uploadFile(filename) {
-    console.log("Apoco si la envio asi na mas el nombre se envia?")
-    console.log(filename[0])
-    api.stopApp(function (res) {
-      console.log(res)
-    }, props.device, "nerves", props.pass)
-    api.uploadFile(function (res) {
-      console.log(res)
-      if (res.result === "ok") {
-        setResponseString(`File Uploaded`)
-        setIsValid(true)
-        setTimeout(() => {
-          setIsValid(false)
-        }, 3000);
-      }
-      else {
-        setResponseString(`File Upload Fail`)
-        setIsError(true)
-        setTimeout(() => {
-          setIsError(false)
-        }, 3000);
-      }
-    }, props.device, "nerves", props.pass, filename[0])
-    api.startApp(function (res) {
-      console.log(res)
-    }, props.device, "nerves", props.pass)
+    if (filename) {
+      console.log("Apoco si la envio asi na mas el nombre se envia?")
+      console.log(filename[0])
+      api.stopApp(function (res) {
+        console.log(res)
+      }, props.device, "nerves", props.pass)
+      api.uploadFile(function (res) {
+        console.log(res)
+        if (res.result === "ok") {
+          setResponseString(`File Uploaded`)
+          setIsValid(true)
+          setTimeout(() => {
+            setIsValid(false)
+          }, 3000);
+        }
+        else {
+          setResponseString(`File Upload Fail`)
+          setIsError(true)
+          setTimeout(() => {
+            setIsError(false)
+          }, 3000);
+        }
+      }, props.device, "nerves", props.pass, filename[0])
+      api.startApp(function (res) {
+        console.log(res)
+      }, props.device, "nerves", props.pass)
+    }
+    else {
+      console.log("El usuario cancelo la seleccion")
+    }
   }
 
   function downloadFile() {
@@ -87,16 +93,21 @@ function Database(props) {
               <Alert show={isError} variant="danger">
                 {responseString}
               </Alert>
-              <Button onClick={handleClick}>
-                Upload a file
-              </Button>
-              <FormControl type="file" style={{ display: 'none' }} ref={hiddenFileInput} onChange={(e) => uploadFile(e.target.files)} />
+              <Row>
+                <Col>
+                  <Button variant="dark" onClick={handleClick}>Upload</Button>
+                  <FormControl type="file" style={{ display: 'none' }} text="Upload" ref={hiddenFileInput} onChange={(e) => uploadFile(e.target.files)} />
+                </Col>
+                <Col>
+                  <Button variant="dark" onClick={downloadFile}>Backup </Button>
+                </Col>
+              </Row>
             </Form>
           </Navbar.Collapse>
         </Navbar>
       </Modal.Body>
       <Modal.Footer>
-        <Button variant="dark" onClick={downloadFile}>Backup</Button>
+
         <Button variant="dark" onClick={props.onHide}>Close</Button>
       </Modal.Footer>
     </Modal >
