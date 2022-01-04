@@ -12,7 +12,6 @@ import Stack from 'react-bootstrap/Stack'
 import Button from 'react-bootstrap/Button'
 
 function Network(props) {
-
     //radio selector
     const [radioSelected, setRadioSelected] = React.useState("radiodhcp")
     const [stateRadioDhcp, setStateRadioDhcp] = React.useState(true)
@@ -101,7 +100,6 @@ function Network(props) {
     }
 
     function ButtonGetNetworkConfig_Click() {
-
         console.log("clicked in get config");
         api.getNetworkConfig(function (res) {
             console.log(res)
@@ -341,6 +339,7 @@ function Network(props) {
             backdrop="static"
             aria-labelledby="contained-modal-title-vcenter"
             centered
+            onShow={ButtonGetNetworkConfig_Click}
         >
             <Modal.Header closeButton>
                 <Modal.Title id="contained-modal-title-vcenter">
