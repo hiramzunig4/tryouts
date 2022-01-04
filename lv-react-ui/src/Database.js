@@ -21,7 +21,7 @@ function Database(props) {
   const [isError, setIsError] = useState(false);
 
   function uploadFile(filename) {
-    if (filename) {
+    if (filename.length > 0) {
       console.log("Apoco si la envio asi na mas el nombre se envia?")
       console.log(filename[0])
       api.stopApp(function (res) {
@@ -47,9 +47,6 @@ function Database(props) {
       api.startApp(function (res) {
         console.log(res)
       }, props.device, "nerves", props.pass)
-    }
-    else {
-      console.log("El usuario cancelo la seleccion")
     }
   }
 
