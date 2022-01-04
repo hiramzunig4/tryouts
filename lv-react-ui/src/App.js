@@ -214,7 +214,7 @@ function App() {
         show={showNetworkModal}
         onHide={() => {
           setShowNetworkModal(false)
-          buttonDiscoveryClick()
+          //buttonDiscoveryClick()
         }}
         device={selectIpDevice}
         pass={devicePass}
