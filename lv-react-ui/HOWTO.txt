@@ -1,8 +1,0 @@
-  "proxy": "http://nerves.local:31680",
-  "proxy": "http://127.0.0.1:5000",
-
-{{10, 77, 3, 171}, 31680,
- '{"data":{"hostname":"nerves-4863","ifname":"eth0","macaddr":"E45F01574889","name":"nerves","version":"0.1.2"},"action":"id","name":"nerves"}'}
-{{10, 77, 3, 170}, 31680,
- '{"data":{"hostname":"nerves-4199","ifname":"eth0","macaddr":"A8E77DED22E8","name":"nerves","version":"0.1.2"},"action":"id","name":"nerves"}'}
-
