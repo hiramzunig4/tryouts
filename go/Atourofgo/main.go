@@ -5,6 +5,10 @@ import (
 )
 
 func main() {
-	fmt.Println("File Pointers.go run")
+	fmt.Println("### Run ###")
 	pointers()
+	fmt.Println("### Run ###")
+	structs()
+	fmt.Println("### Run ###")
+	arrays()
 }
