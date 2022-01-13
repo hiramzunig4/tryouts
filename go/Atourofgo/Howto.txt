@@ -1,0 +1,1 @@
+go mod init github.com/hiramzunig4/tryouts/go/Atourofgo
